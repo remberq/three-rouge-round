@@ -35,14 +35,14 @@ Implement a deterministic, headless **turn-based combat rules engine** that cons
 
 ## Tasks
 
-- [ ] Create combat module structure per issue.
-- [ ] Implement stats + damage (phys/magic, armor/marmor).
-- [ ] Implement event types + reducer.
-- [ ] Implement bridge from match3 matches/cascades -> damage events.
-- [ ] Implement resolver + deterministic sim helpers.
-- [ ] Tests: damage/enemy-turns/harmful/deterministic.
-- [ ] Update docs: combat/tiles/entities-and-stats + event-queue.
-- [ ] Update WORKLOG.
+- [x] Create combat module structure per issue.
+- [x] Implement stats + damage (phys/magic, armor/marmor).
+- [x] Implement event types + reducer.
+- [x] Implement bridge from match3 matches/cascades -> damage events.
+- [x] Implement resolver + deterministic sim helpers.
+- [x] Tests: damage/enemy-turns/harmful/deterministic.
+- [x] Update docs: combat/tiles/entities-and-stats + event-queue.
+- [x] Update WORKLOG.
 
 ## Tests
 

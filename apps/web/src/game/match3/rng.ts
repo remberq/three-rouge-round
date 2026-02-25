@@ -2,6 +2,7 @@ export type Rng = {
   nextFloat: () => number; // [0, 1)
   nextInt: (maxExclusive: number) => number; // [0, maxExclusive)
   clone: () => Rng;
+  getState: () => number; // implementation-defined (uint32)
 };
 
 // mulberry32: tiny deterministic PRNG
@@ -25,6 +26,7 @@ export function createRng(seed: number): Rng {
       return Math.floor(api.nextFloat() * maxExclusive);
     },
     clone: () => createRng(a),
+    getState: () => a,
   };
 
   return api;
