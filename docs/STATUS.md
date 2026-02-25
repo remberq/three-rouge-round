@@ -7,6 +7,7 @@
 ## Active Execution Plans
 
 - [EP-0000: Repo bootstrap + harness](exec-plans/active/EP-0000-repo-bootstrap.md)
+- [EP-0002: Combat resolver (turn-based rules)](exec-plans/active/EP-0002-combat-resolver.md)
 
 ## Completed Execution Plans
 
