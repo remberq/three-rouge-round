@@ -36,15 +36,15 @@ Implement a deterministic, testable **match-3 rules engine** (no Pixi) with:
 
 ## Tasks
 
-- [ ] Create `apps/web/src/game/match3/` module structure (types/rng/board/detect/resolve/swap/serialize).
-- [ ] Implement deterministic board generation with `allowInitialMatches=false` default.
-- [ ] Implement match detection (h/v 3+).
-- [ ] Implement swap validation (swap must create a match else rollback).
-- [ ] Implement resolve pipeline: clear → gravity → fill → cascades until stable.
-- [ ] Implement SwapResult with cascade steps.
-- [ ] Add tests: detect/swap/cascade/generate.
-- [ ] Update docs: `docs/product-specs/match3.md` and (if needed) `docs/design-docs/event-queue.md` to reflect implemented behavior.
-- [ ] Update `docs/WORKLOG.md` with key decisions.
+- [x] Create `apps/web/src/game/match3/` module structure (types/rng/board/detect/resolve/swap/serialize).
+- [x] Implement deterministic board generation with `allowInitialMatches=false` default.
+- [x] Implement match detection (h/v 3+).
+- [x] Implement swap validation (swap must create a match else rollback).
+- [x] Implement resolve pipeline: clear → gravity → fill → cascades until stable.
+- [x] Implement SwapResult with cascade steps.
+- [x] Add tests: detect/swap/cascade/generate.
+- [x] Update docs: `docs/product-specs/match3.md` and `docs/design-docs/event-queue.md` to reflect implemented behavior.
+- [x] Update `docs/WORKLOG.md` with key decisions.
 
 ## Tests
 
