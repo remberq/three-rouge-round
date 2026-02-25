@@ -1,0 +1,10 @@
+# Codex project config
+# Keep approvals tight; this repo is designed to be the system-of-record.
+
+[project]
+# Keep doc reads bounded for context
+project_doc_max_bytes = 200000
+
+[approvals]
+# Prefer explicit approval prompts for destructive operations
+mode = "ask"
