@@ -8,6 +8,10 @@
 
 - [EP-0000: Repo bootstrap + harness](exec-plans/active/EP-0000-repo-bootstrap.md)
 
+## Completed Execution Plans
+
+- [EP-0001: Match-3 rules (deterministic core)](exec-plans/completed/EP-0001-match3-rules.md)
+
 ## What’s next
 
 - Finish EP-0000 (scaffold web app + CI + docs-lint).
