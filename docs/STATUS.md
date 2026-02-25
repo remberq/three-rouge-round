@@ -7,11 +7,11 @@
 ## Active Execution Plans
 
 - [EP-0000: Repo bootstrap + harness](exec-plans/active/EP-0000-repo-bootstrap.md)
-- [EP-0002: Combat resolver (turn-based rules)](exec-plans/active/EP-0002-combat-resolver.md)
 
 ## Completed Execution Plans
 
 - [EP-0001: Match-3 rules (deterministic core)](exec-plans/completed/EP-0001-match3-rules.md)
+- [EP-0002: Combat resolver (turn-based rules)](exec-plans/completed/EP-0002-combat-resolver.md)
 
 ## What’s next
 
@@ -19,6 +19,5 @@
 
 ## Next EP suggestions
 
-- EP-0001: deterministic game state model + event queue + tests.
-- EP-0002: match-3 rules prototype (swap/resolve) + test vectors.
-- EP-0003: combat loop prototype (turn order, intents, damage) + tests.
+- EP-0003: connect combat+match3 to a renderer-facing event stream + minimal debug UI.
+- EP-0004: richer combat intents/effects (buffs/debuffs), enemy AI intents.
