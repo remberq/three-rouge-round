@@ -21,6 +21,7 @@ import { enemyAttackFlashStep } from './render/animations/enemyAttack';
 import { HudView } from './render/hud/hudView';
 import { groupDamageEventsByMatchStep } from './render/animations/script';
 import { damagePopupsStep } from './render/animations/damage';
+import { waitStep } from './render/animations/wait';
 
 async function main() {
   const host = document.querySelector<HTMLDivElement>('#app');
@@ -33,7 +34,8 @@ async function main() {
   // - Host size can change after CSS/layout settles.
   const ro = new ResizeObserver(() => {
     app.resize();
-    syncLayout();
+    // Never full-sync during resize; only reposition current sprites.
+    syncLayout({ fullSync: false });
   });
   ro.observe(host);
 
@@ -64,7 +66,7 @@ async function main() {
     cellSize: 56,
   });
 
-  const syncLayout = () => {
+  const syncLayout = (opts: { fullSync?: boolean } = {}) => {
     // On first load, Pixi's resizeTo can lag a tick; guard against 0-sized renderer.
     if (app.renderer.width < 10 || app.renderer.height < 10) return;
 
@@ -76,15 +78,22 @@ async function main() {
       cellSize: 56,
     });
     boardView.setLayout(layout);
-    boardView.syncBoard(state.board);
+
+    // During animations the BoardView is a temporary "view state" and should NOT be reset
+    // from game state (otherwise tiles can appear to teleport/re-roll).
+    if (opts.fullSync && !animQueue.isRunning) {
+      boardView.syncBoard(state.board);
+    } else {
+      boardView.snapToLayout(layout);
+    }
   };
 
-  app.renderer.on('resize', syncLayout);
+  app.renderer.on('resize', () => syncLayout({ fullSync: false }));
 
   // Kick initial sync after layout settles.
-  syncLayout();
-  requestAnimationFrame(syncLayout);
-  setTimeout(syncLayout, 0);
+  syncLayout({ fullSync: true });
+  requestAnimationFrame(() => syncLayout({ fullSync: true }));
+  setTimeout(() => syncLayout({ fullSync: true }), 0);
 
   const input = new BoardInput(
     app,
@@ -125,6 +134,7 @@ async function main() {
         steps.push(highlightStep({ app, boardView, cells: cs.matches.flatMap((g) => g.cells) }));
         steps.push(clearStep({ app, boardView, cells: cs.clearedCells }));
         steps.push(dropStep({ app, boardView, layout, drops: cs.drops }));
+        steps.push(waitStep({ app, ms: 70, name: 'settle' }));
         steps.push(spawnStep({ app, boardView, layout, spawns: cs.spawns }));
 
         const dmg = dmgByStep.get(i) ?? [];
@@ -142,6 +152,8 @@ async function main() {
       state = res.state;
       hud.sync(state);
       boardView.syncBoard(state.board);
+      // After committing state, it's safe to do a full sync.
+      syncLayout({ fullSync: true });
     },
   );
 
