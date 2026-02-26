@@ -1,8 +1,6 @@
-import { Text } from 'pixi.js';
 import type { Application } from 'pixi.js';
 
 import type { Coord, DropMove, SpawnMove } from '../../game/match3';
-import type { CombatEvent } from '../../game/combat';
 
 import type { AnimStep } from './queue';
 import { tween } from './queue';
@@ -174,47 +172,7 @@ export function spawnStep(params: {
   };
 }
 
-export function damagePopupStep(params: {
-  app: Application;
-  layout: BoardLayout;
-  stage: import('pixi.js').Container;
-  events: CombatEvent[];
-}): AnimStep {
-  return {
-    name: 'damagePopups',
-    run: async () => {
-      const damage = params.events.filter((e) => e.type === 'DamageDealt');
-      if (damage.length === 0) return;
-
-      for (const d of damage) {
-        const txt = new Text({
-          text: `-${d.amount}`,
-          style: {
-            fill: d.target === 'hero' ? 0xff6666 : 0xffffff,
-            fontSize: 18,
-            fontFamily: 'monospace',
-          },
-        });
-        txt.anchor.set(0.5);
-        txt.x = params.layout.originX + 30;
-        txt.y = params.layout.originY - 30 + (d.target === 'hero' ? 0 : -24);
-
-        params.stage.addChild(txt);
-
-        const y0 = txt.y;
-        await tween({
-          ticker: params.app.ticker,
-          durationMs: 420,
-          onUpdate: (t) => {
-            txt.alpha = 1 - t;
-            txt.y = y0 - 30 * t;
-          },
-        });
-        txt.destroy();
-      }
-    },
-  };
-}
+// damage popups moved to animations/damage.ts
 
 export function shakeBoardStep(params: { app: Application; boardView: BoardView }): AnimStep {
   return {

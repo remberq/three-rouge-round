@@ -6,5 +6,6 @@ export * from './animations/queue';
 export * from './animations/steps';
 export * from './animations/enemyAttack';
 export * from './animations/invalidMove';
+export * from './animations/damage';
 export * from './hud/hudView';
 export * from './hud/hpBar';

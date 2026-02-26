@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js';
-import type { Board } from '../../game/match3';
+import type { Board, TileId } from '../../game/match3';
 import type { BoardLayout } from './layout';
 import { cellToWorld } from './layout';
 import { TileSprite } from './tileSprite';
@@ -13,6 +13,9 @@ export class BoardView {
   private tilesByKey = new Map<string, TileSprite>();
   private highlighted = new Set<string>();
   private selectedKey: string | null = null;
+
+  // simple pool to avoid frequent allocations
+  private pool: TileSprite[] = [];
 
   constructor() {
     this.root.addChild(this.frame);
@@ -52,7 +55,7 @@ export class BoardView {
 
         let ts = this.tilesByKey.get(key);
         if (!ts) {
-          ts = new TileSprite(t, { x, y });
+          ts = this.acquire(t, { x, y });
           this.tilesByKey.set(key, ts);
           this.root.addChild(ts.root);
         } else {
@@ -74,8 +77,24 @@ export class BoardView {
     for (const [key, ts] of this.tilesByKey.entries()) {
       if (nextKeys.has(key)) continue;
       this.tilesByKey.delete(key);
-      ts.root.destroy({ children: true });
+      this.release(ts);
     }
+  }
+
+  private acquire(tile: TileId, coord: { x: number; y: number }) {
+    const ts = this.pool.pop() ?? new TileSprite(tile, coord);
+    ts.setTile(tile);
+    ts.coord = { ...coord };
+    ts.root.visible = true;
+    ts.root.alpha = 1;
+    ts.root.scale.set(1);
+    return ts;
+  }
+
+  private release(ts: TileSprite) {
+    ts.root.visible = false;
+    ts.root.removeFromParent();
+    this.pool.push(ts);
   }
 
   getSpriteAt(c: { x: number; y: number }): TileSprite | undefined {
@@ -109,7 +128,7 @@ export class BoardView {
   }
 
   createSpawns(
-    spawns: Array<{ to: { x: number; y: number }; tile: import('../../game/match3').TileId; spawnFromY: number }>,
+    spawns: Array<{ to: { x: number; y: number }; tile: TileId; spawnFromY: number }>,
     layout: BoardLayout,
   ): Array<{ sprite: TileSprite; fromY: number; toY: number }> {
     const created: Array<{ sprite: TileSprite; fromY: number; toY: number }> = [];
@@ -117,7 +136,7 @@ export class BoardView {
 
     for (const s of spawns) {
       const key = `${s.to.x},${s.to.y}`;
-      const ts = new TileSprite(s.tile, { ...s.to });
+      const ts = this.acquire(s.tile, { ...s.to });
       this.tilesByKey.set(key, ts);
       this.root.addChild(ts.root);
 
@@ -141,7 +160,7 @@ export class BoardView {
       const s = this.tilesByKey.get(key);
       if (!s) continue;
       this.tilesByKey.delete(key);
-      s.root.destroy({ children: true });
+      this.release(s);
     }
   }
 

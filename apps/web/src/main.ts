@@ -11,7 +11,6 @@ import { computeBoardLayout } from './render/board/layout';
 import { AnimationQueue } from './render/animations/queue';
 import {
   clearStep,
-  damagePopupStep,
   dropStep,
   highlightStep,
   shakeBoardStep,
@@ -21,6 +20,7 @@ import {
 import { enemyAttackFlashStep } from './render/animations/enemyAttack';
 import { HudView } from './render/hud/hudView';
 import { groupDamageEventsByMatchStep } from './render/animations/script';
+import { damagePopupsStep } from './render/animations/damage';
 
 async function main() {
   const host = document.querySelector<HTMLDivElement>('#app');
@@ -99,9 +99,7 @@ async function main() {
       const dmgByStep = groupDamageEventsByMatchStep(res.events);
 
       // For each resolve step (cascades), animate based on detailed mapping.
-      // Note: combat event stepIndex=0 is the immediate post-swap match list;
-      // the match3 resolver step[0] corresponds to that same match being actually cleared.
-      // Therefore we bind damage to stepIndex = i + 1.
+      // Convention: combat MatchStepResolved.stepIndex aligns with match3 cascade index.
       for (let i = 0; i < swap.cascades.length; i++) {
         const cs = swap.cascades[i];
 
@@ -110,8 +108,8 @@ async function main() {
         steps.push(dropStep({ app, boardView, layout, drops: cs.drops }));
         steps.push(spawnStep({ app, boardView, layout, spawns: cs.spawns }));
 
-        const dmg = dmgByStep.get(i + 1) ?? [];
-        steps.push(damagePopupStep({ app, layout, stage: app.stage, events: dmg }));
+        const dmg = dmgByStep.get(i) ?? [];
+        steps.push(damagePopupsStep({ app, stage: app.stage, origin: { x: layout.originX, y: layout.originY }, events: dmg }));
       }
 
       // Enemy attack visual (simple): flash HUD if an enemy attack happened.

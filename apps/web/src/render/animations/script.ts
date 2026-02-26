@@ -5,6 +5,7 @@ export type DamageEventsByStep = Map<number, CombatEvent[]>;
 export function groupDamageEventsByMatchStep(events: CombatEvent[]): DamageEventsByStep {
   // We group DamageDealt events under the latest MatchStepResolved.stepIndex.
   // Anything after TurnEnded is not step-bound.
+  // EP-0003 convention: stepIndex aligns with match3 cascade index.
   const out = new Map<number, CombatEvent[]>();
 
   let currentStep: number | null = null;
