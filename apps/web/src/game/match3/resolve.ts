@@ -1,4 +1,4 @@
-import type { Board, CascadeStep, Coord, SpawnedTile, TileId } from './types';
+import type { Board, CascadeStep, Coord, DropMove, SpawnMove, SpawnedTile, TileId } from './types';
 import { cloneBoard, setTile } from './board';
 import type { Rng } from './rng';
 import { findMatches, matchCells } from './detect';
@@ -12,36 +12,74 @@ export function clearCells(board: Board, cells: Coord[]): void {
   for (const c of cells) setTile(board, c, null);
 }
 
-export function applyGravity(board: Board): void {
-  // per column: compact non-nulls downwards preserving relative order
-  for (let x = 0; x < board.width; x++) {
-    const col: (TileId | null)[] = [];
-    for (let y = 0; y < board.height; y++) {
-      col.push(board.tiles[y * board.width + x]);
+export function applyGravityWithMoves(_before: Board, after: Board): DropMove[] {
+  // Mutates `after` to gravity-applied board, returns drop moves for tiles that moved.
+  const drops: DropMove[] = [];
+
+  for (let x = 0; x < after.width; x++) {
+    // Collect tiles in this column from `after` (after clear).
+    const tiles: TileId[] = [];
+    const fromCoords: { tile: TileId; fromY: number }[] = [];
+
+    for (let y = 0; y < after.height; y++) {
+      const t = after.tiles[y * after.width + x];
+      if (t !== null) {
+        tiles.push(t);
+        fromCoords.push({ tile: t, fromY: y });
+      }
     }
 
-    const nonNulls = col.filter((t): t is TileId => t !== null);
-    const empties = board.height - nonNulls.length;
-    const newCol: (TileId | null)[] = [...Array.from({ length: empties }, () => null as TileId | null), ...nonNulls];
+    const empties = after.height - tiles.length;
 
-    for (let y = 0; y < board.height; y++) {
-      board.tiles[y * board.width + x] = newCol[y];
+    // Write new column
+    for (let y = 0; y < after.height; y++) {
+      const idx = y * after.width + x;
+      after.tiles[idx] = y < empties ? null : tiles[y - empties];
+    }
+
+    // Compute moves: match original fromCoords to new Ys in order (stable)
+    for (let i = 0; i < fromCoords.length; i++) {
+      const from = fromCoords[i];
+      const toY = empties + i;
+      if (from.fromY !== toY) {
+        drops.push({ from: { x, y: from.fromY }, to: { x, y: toY }, tile: from.tile });
+      }
     }
   }
+
+  return drops;
 }
 
-export function fillEmpties(board: Board, rng: Rng, tileIds: readonly TileId[]): SpawnedTile[] {
-  const spawned: SpawnedTile[] = [];
-  for (let y = 0; y < board.height; y++) {
-    for (let x = 0; x < board.width; x++) {
+export function fillEmptiesWithMoves(board: Board, rng: Rng, tileIds: readonly TileId[]): {
+  spawnedTiles: SpawnedTile[];
+  spawns: SpawnMove[];
+} {
+  const spawnedTiles: SpawnedTile[] = [];
+  const spawns: SpawnMove[] = [];
+
+  for (let x = 0; x < board.width; x++) {
+    // count empties in this column
+    let empties = 0;
+    for (let y = 0; y < board.height; y++) {
+      if (board.tiles[y * board.width + x] === null) empties++;
+    }
+
+    // Fill from top to bottom; for animation we spawn from y = -k
+    let spawnedSoFar = 0;
+    for (let y = 0; y < board.height; y++) {
       const i = y * board.width + x;
       if (board.tiles[i] !== null) continue;
+
       const tile = tileIds[rng.nextInt(tileIds.length)];
       board.tiles[i] = tile;
-      spawned.push({ at: { x, y }, tile });
+
+      spawnedTiles.push({ at: { x, y }, tile });
+      spawns.push({ to: { x, y }, tile, spawnFromY: -empties + spawnedSoFar });
+      spawnedSoFar++;
     }
   }
-  return spawned;
+
+  return { spawnedTiles, spawns };
 }
 
 export function resolveCascades(initial: Board, rng: Rng, tileIds: readonly TileId[]): ResolveResult {
@@ -54,11 +92,15 @@ export function resolveCascades(initial: Board, rng: Rng, tileIds: readonly Tile
     if (matches.length === 0) break;
 
     const clearedCells = matchCells(matches);
-    clearCells(board, clearedCells);
-    applyGravity(board);
-    const spawnedTiles = fillEmpties(board, rng, tileIds);
 
-    steps.push({ matches, clearedCells, spawnedTiles });
+    const beforeStep = cloneBoard(board);
+
+    clearCells(board, clearedCells);
+
+    const drops = applyGravityWithMoves(beforeStep, board);
+    const { spawnedTiles, spawns } = fillEmptiesWithMoves(board, rng, tileIds);
+
+    steps.push({ matches, clearedCells, drops, spawns, spawnedTiles });
   }
 
   return { board, steps };
