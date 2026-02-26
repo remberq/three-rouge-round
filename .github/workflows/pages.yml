@@ -3,6 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request_target:
   workflow_dispatch:
 
 permissions:
@@ -11,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -19,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # For PR previews, deploy the HEAD SHA (not the PR merge ref) so environment branch policies match.
+          ref: ${{ (github.event_name == 'pull_request_target') && github.event.pull_request.head.sha || github.sha }}
 
       - uses: pnpm/action-setup@v4
         with:
@@ -40,7 +44,22 @@ jobs:
         with:
           path: apps/web/dist
 
+  deploy_preview:
+    if: github.event_name == 'pull_request_target'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          preview: true
+
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
