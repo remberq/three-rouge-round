@@ -12,6 +12,7 @@
 
 - [EP-0001: Match-3 rules (deterministic core)](exec-plans/completed/EP-0001-match3-rules.md)
 - [EP-0002: Combat resolver (turn-based rules)](exec-plans/completed/EP-0002-combat-resolver.md)
+- [EP-0003: Render + animations](exec-plans/completed/EP-0003-render-animations.md)
 
 ## What’s next
 

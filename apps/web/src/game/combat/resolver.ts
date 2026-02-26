@@ -1,5 +1,5 @@
 import { createRng, trySwap } from '../match3';
-import type { Coord } from '../match3';
+import type { Coord, SwapResult } from '../match3';
 import type { BridgeConfig } from './bridge';
 import { eventsForSwapResult } from './bridge';
 import { DEFAULT_ENEMY, DEFAULT_HERO, DEFAULT_TILE_DEFS } from './defs';
@@ -17,7 +17,7 @@ export function resolvePlayerMove(
   a: Coord,
   b: Coord,
   cfg: ResolveConfig = {},
-): { state: CombatState; events: CombatEvent[] } {
+): { state: CombatState; events: CombatEvent[]; swapResult?: SwapResult } {
   const events: CombatEvent[] = [];
   if (state.status !== 'active') return { state, events };
 
@@ -34,7 +34,7 @@ export function resolvePlayerMove(
 
   if (!swap.ok) {
     events.push({ type: 'SwapRejected', a, b });
-    return { state: { ...state, rngState: nextRngState }, events };
+    return { state: { ...state, rngState: nextRngState }, events, swapResult: swap };
   }
 
   // Bridge match3 -> combat events
@@ -80,5 +80,5 @@ export function resolvePlayerMove(
     events.push({ type: 'BattleEnded', result: next.status });
   }
 
-  return { state: next, events };
+  return { state: next, events, swapResult: swap };
 }

@@ -35,14 +35,11 @@ export function eventsForSwapResult(result: SwapResult, cfg: BridgeConfig): Comb
   if (!result.ok) return [];
   const out: CombatEvent[] = [];
 
-  // Step 0: primary matches after swap
-  out.push({ type: 'MatchStepResolved', stepIndex: 0, groups: result.matches });
-  out.push(...eventsForMatchGroups(result.matches, cfg));
-
-  // Cascades are already captured as steps including matches.
+  // We bind combat match steps directly to match3 cascade steps.
+  // stepIndex = i corresponds to result.cascades[i].
   for (let i = 0; i < result.cascades.length; i++) {
     const step = result.cascades[i];
-    const stepIndex = i + 1;
+    const stepIndex = i;
     out.push({ type: 'MatchStepResolved', stepIndex, groups: step.matches });
     out.push(...eventsForMatchGroups(step.matches, cfg));
   }

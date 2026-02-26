@@ -13,3 +13,9 @@ Keep the game logic deterministic + testable without Pixi.
 ## Notes
 
 Renderer consumes snapshots/events produced by rules.
+
+### Render is a consumer
+
+- `apps/web/src/game/**` is deterministic rules/state.
+- `apps/web/src/render/**` renders and plays animations based on `SwapResult` + combat events.
+- Render must not re-compute matches, cascades, or damage.
