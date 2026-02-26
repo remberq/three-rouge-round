@@ -50,15 +50,15 @@ Build a minimal but correct **render/animation layer** (PixiJS) that **consumes*
 
 ## Tasks
 
-- [ ] Create render folder structure per issue.
-- [ ] Implement BoardView (stable sprites; no per-frame recreation).
-- [ ] Implement input: click-select + drag-swap; emit swap intent.
-- [ ] Implement AnimationQueue + basic steps (swap, highlight, clear, drop, spawn, damage popup).
-- [ ] Implement HUD (hero/enemy hp + turnCount).
-- [ ] Wire `main.ts` to maintain `currentCombatState` and run queue.
-- [ ] If required: extend match-3 resolver step data to include drops/spawns mapping.
-- [ ] Update docs: `docs/design-docs/animation-pipeline.md` and `architecture-layers.md`.
-- [ ] Run gates: `pnpm lint/typecheck/test/docs:lint`.
+- [x] Create render folder structure per issue.
+- [x] Implement BoardView (stable sprites; pooled; no per-frame recreation).
+- [x] Implement input: click-select + drag-swap; emit swap intent.
+- [x] Implement AnimationQueue + basic steps (swap, highlight, clear, drop, spawn, damage popup).
+- [x] Implement HUD (hero/enemy hp + turnCount).
+- [x] Wire `main.ts` to maintain `currentCombatState` and run queue.
+- [x] Extend match-3 resolver step data to include drops/spawns mapping.
+- [x] Update docs: `docs/design-docs/animation-pipeline.md` and `architecture-layers.md`.
+- [x] Run gates: `pnpm lint/typecheck/test/docs:lint`.
 
 ## Tests
 
