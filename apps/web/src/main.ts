@@ -18,6 +18,7 @@ import {
   spawnStep,
   swapStep,
 } from './render/animations/steps';
+import { enemyAttackFlashStep } from './render/animations/enemyAttack';
 import { HudView } from './render/hud/hudView';
 import { groupDamageEventsByMatchStep } from './render/animations/script';
 
@@ -105,6 +106,11 @@ async function main() {
         steps.push(damagePopupStep({ app, layout, stage: app.stage, events: dmg }));
       }
 
+      // Enemy attack visual (simple): flash HUD if an enemy attack happened.
+      if (res.events.some((e) => e.type === 'EnemyAttack')) {
+        steps.push(enemyAttackFlashStep({ app, target: hud.root }));
+      }
+
       await animQueue.runSequential(app.ticker, steps);
 
       // Commit state and sync HUD/board
@@ -113,6 +119,15 @@ async function main() {
       boardView.syncBoard(state.board);
     },
   );
+
+  // Selected cell highlight (cheap; updates only on change)
+  let lastSelected: { x: number; y: number } | null = null;
+  app.ticker.add(() => {
+    const sel = input.getSelected();
+    if (sel?.x === lastSelected?.x && sel?.y === lastSelected?.y) return;
+    lastSelected = sel ? { ...sel } : null;
+    boardView.setSelected(lastSelected);
+  });
 
   // keep for now
   void input;

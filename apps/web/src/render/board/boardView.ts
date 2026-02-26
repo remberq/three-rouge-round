@@ -12,6 +12,7 @@ export class BoardView {
 
   private tilesByKey = new Map<string, TileSprite>();
   private highlighted = new Set<string>();
+  private selectedKey: string | null = null;
 
   constructor() {
     this.root.addChild(this.frame);
@@ -65,7 +66,7 @@ export class BoardView {
         ts.root.alpha = 1;
         ts.root.scale.set(1);
         ts.render(cellSize);
-        ts.root.tint = this.highlighted.has(key) ? 0xffffaa : 0xffffff;
+        ts.root.tint = this.selectedKey === key ? 0xaaffff : this.highlighted.has(key) ? 0xffffaa : 0xffffff;
       }
     }
 
@@ -150,7 +151,25 @@ export class BoardView {
       if (on) this.highlighted.add(key);
       else this.highlighted.delete(key);
       const s = this.tilesByKey.get(key);
-      if (s) s.root.tint = on ? 0xffffaa : 0xffffff;
+      if (s) s.root.tint = this.selectedKey === key ? 0xaaffff : on ? 0xffffaa : 0xffffff;
+    }
+  }
+
+  setSelected(cell: { x: number; y: number } | null) {
+    const nextKey = cell ? `${cell.x},${cell.y}` : null;
+    if (this.selectedKey === nextKey) return;
+
+    // un-tint previous
+    if (this.selectedKey) {
+      const s = this.tilesByKey.get(this.selectedKey);
+      if (s) s.root.tint = this.highlighted.has(this.selectedKey) ? 0xffffaa : 0xffffff;
+    }
+
+    this.selectedKey = nextKey;
+
+    if (this.selectedKey) {
+      const s = this.tilesByKey.get(this.selectedKey);
+      if (s) s.root.tint = 0xaaffff;
     }
   }
 
