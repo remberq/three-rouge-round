@@ -79,7 +79,15 @@ async function main() {
       const swap = res.swapResult;
 
       if (!swap || !swap.ok) {
-        await animQueue.runSequential(app.ticker, [shakeBoardStep({ app, boardView })]);
+        // Better invalid UX: shake only the attempted tiles if present.
+        const sa = boardView.getSpriteAt(a);
+        const sb = boardView.getSpriteAt(b);
+        if (sa && sb) {
+          const { invalidMoveShakeStep } = await import('./render/animations/invalidMove');
+          await animQueue.runSequential(app.ticker, [invalidMoveShakeStep({ app, sprites: [sa, sb] })]);
+        } else {
+          await animQueue.runSequential(app.ticker, [shakeBoardStep({ app, boardView })]);
+        }
         return;
       }
 
