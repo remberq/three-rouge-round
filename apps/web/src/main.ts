@@ -22,11 +22,23 @@ import { HudView } from './render/hud/hudView';
 import { groupDamageEventsByMatchStep } from './render/animations/script';
 import { damagePopupsStep } from './render/animations/damage';
 
+async function waitForStableHostSize(host: HTMLElement, minW: number, minH: number, maxFrames: number) {
+  for (let i = 0; i < maxFrames; i++) {
+    if (host.clientWidth >= minW && host.clientHeight >= minH) return;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  }
+}
+
 async function main() {
   const host = document.querySelector<HTMLDivElement>('#app');
   if (!host) throw new Error('Missing #app root element');
 
   const app = await createPixiApp(host);
+
+  // Wait until the host has a real size. Pixi resizeTo can start at 64x64 on first tick.
+  await waitForStableHostSize(host, 200, 200, 60);
+  // Force one resize so renderer matches actual host size.
+  app.renderer.resize(host.clientWidth, host.clientHeight);
 
   // Initial game state
   const seed = 123;
