@@ -53,6 +53,9 @@ async function main() {
   });
 
   const syncLayout = () => {
+    // On first load, Pixi's resizeTo can lag a tick; guard against 0-sized renderer.
+    if (app.renderer.width < 10 || app.renderer.height < 10) return;
+
     layout = computeBoardLayout({
       viewWidth: app.renderer.width,
       viewHeight: app.renderer.height,
@@ -65,7 +68,11 @@ async function main() {
   };
 
   app.renderer.on('resize', syncLayout);
+
+  // Kick initial sync after layout settles.
   syncLayout();
+  requestAnimationFrame(syncLayout);
+  setTimeout(syncLayout, 0);
 
   const input = new BoardInput(
     app,
