@@ -88,6 +88,7 @@ export class BoardView {
     ts.root.visible = true;
     ts.root.alpha = 1;
     ts.root.scale.set(1);
+    ts.root.tint = 0xffffff;
     return ts;
   }
 
@@ -116,14 +117,22 @@ export class BoardView {
   }
 
   applyDrops(drops: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }>) {
+    // Apply all moves atomically to avoid key collisions when multiple tiles drop in the same column.
+    const moved: Array<{ toKey: string; sprite: TileSprite; to: { x: number; y: number } }> = [];
+
+    // First collect & remove
     for (const m of drops) {
       const fromKey = `${m.from.x},${m.from.y}`;
-      const toKey = `${m.to.x},${m.to.y}`;
       const s = this.tilesByKey.get(fromKey);
       if (!s) continue;
       this.tilesByKey.delete(fromKey);
-      this.tilesByKey.set(toKey, s);
-      s.coord = { ...m.to };
+      moved.push({ toKey: `${m.to.x},${m.to.y}`, sprite: s, to: m.to });
+    }
+
+    // Then set destinations
+    for (const m of moved) {
+      this.tilesByKey.set(m.toKey, m.sprite);
+      m.sprite.coord = { ...m.to };
     }
   }
 
