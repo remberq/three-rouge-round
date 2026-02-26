@@ -6,8 +6,20 @@ import { initCombatState, resolvePlayerMove } from './game/combat';
 
 import { createPixiApp } from './render/pixi/app';
 import { BoardView } from './render/board/boardView';
+import { BoardInput } from './render/board/input';
 import { computeBoardLayout } from './render/board/layout';
 import { AnimationQueue } from './render/animations/queue';
+import {
+  clearStep,
+  damagePopupStep,
+  dropStep,
+  highlightStep,
+  shakeBoardStep,
+  spawnStep,
+  swapStep,
+} from './render/animations/steps';
+import { HudView } from './render/hud/hudView';
+import { groupDamageEventsByMatchStep } from './render/animations/script';
 
 async function main() {
   const host = document.querySelector<HTMLDivElement>('#app');
@@ -25,10 +37,22 @@ async function main() {
   const boardView = new BoardView();
   app.stage.addChild(boardView.root);
 
+  const hud = new HudView();
+  app.stage.addChild(hud.root);
+  hud.sync(state);
+
   const animQueue = new AnimationQueue();
 
+  let layout = computeBoardLayout({
+    viewWidth: app.renderer.width,
+    viewHeight: app.renderer.height,
+    cols: state.board.width,
+    rows: state.board.height,
+    cellSize: 56,
+  });
+
   const syncLayout = () => {
-    const layout = computeBoardLayout({
+    layout = computeBoardLayout({
       viewWidth: app.renderer.width,
       viewHeight: app.renderer.height,
       cols: state.board.width,
@@ -42,20 +66,56 @@ async function main() {
   app.renderer.on('resize', syncLayout);
   syncLayout();
 
-  // Temporary: demo a single move after 1s (until input layer is implemented)
-  setTimeout(async () => {
-    if (animQueue.isRunning) return;
+  const input = new BoardInput(
+    app,
+    () => layout,
+    () => ({ width: state.board.width, height: state.board.height }),
+    () => animQueue.isRunning,
+    async ({ a, b }) => {
+      if (animQueue.isRunning) return;
 
-    const a = { x: 1, y: 0 };
-    const b = { x: 1, y: 1 };
+      const res = resolvePlayerMove(state, a, b);
+      const swap = res.swapResult;
 
-    const res = resolvePlayerMove(state, a, b);
+      if (!swap || !swap.ok) {
+        await animQueue.runSequential(app.ticker, [shakeBoardStep({ app, boardView })]);
+        return;
+      }
 
-    // For now: no detailed animations, just lock + swap final board.
-    await animQueue.runSequential(app.ticker, []);
-    state = res.state;
-    boardView.syncBoard(state.board);
-  }, 1000);
+      // Build animation script
+      const steps = [] as import('./render/animations/queue').AnimStep[];
+
+      steps.push(swapStep({ app, boardView, layout, a, b }));
+
+      const dmgByStep = groupDamageEventsByMatchStep(res.events);
+
+      // For each resolve step (cascades), animate based on detailed mapping.
+      // Note: combat event stepIndex=0 is the immediate post-swap match list;
+      // the match3 resolver step[0] corresponds to that same match being actually cleared.
+      // Therefore we bind damage to stepIndex = i + 1.
+      for (let i = 0; i < swap.cascades.length; i++) {
+        const cs = swap.cascades[i];
+
+        steps.push(highlightStep({ app, boardView, cells: cs.matches.flatMap((g) => g.cells) }));
+        steps.push(clearStep({ app, boardView, cells: cs.clearedCells }));
+        steps.push(dropStep({ app, boardView, layout, drops: cs.drops }));
+        steps.push(spawnStep({ app, boardView, layout, spawns: cs.spawns }));
+
+        const dmg = dmgByStep.get(i + 1) ?? [];
+        steps.push(damagePopupStep({ app, layout, stage: app.stage, events: dmg }));
+      }
+
+      await animQueue.runSequential(app.ticker, steps);
+
+      // Commit state and sync HUD/board
+      state = res.state;
+      hud.sync(state);
+      boardView.syncBoard(state.board);
+    },
+  );
+
+  // keep for now
+  void input;
 }
 
 main().catch((err) => {

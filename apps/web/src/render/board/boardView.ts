@@ -11,6 +11,7 @@ export class BoardView {
   private layout: BoardLayout | null = null;
 
   private tilesByKey = new Map<string, TileSprite>();
+  private highlighted = new Set<string>();
 
   constructor() {
     this.root.addChild(this.frame);
@@ -61,7 +62,10 @@ export class BoardView {
         const p = cellToWorld(this.layout, { x, y });
         ts.root.x = p.x + 2;
         ts.root.y = p.y + 2;
+        ts.root.alpha = 1;
+        ts.root.scale.set(1);
         ts.render(cellSize);
+        ts.root.tint = this.highlighted.has(key) ? 0xffffaa : 0xffffff;
       }
     }
 
@@ -70,6 +74,94 @@ export class BoardView {
       if (nextKeys.has(key)) continue;
       this.tilesByKey.delete(key);
       ts.root.destroy({ children: true });
+    }
+  }
+
+  getSpriteAt(c: { x: number; y: number }): TileSprite | undefined {
+    return this.tilesByKey.get(`${c.x},${c.y}`);
+  }
+
+  swapCoords(a: { x: number; y: number }, b: { x: number; y: number }) {
+    const ka = `${a.x},${a.y}`;
+    const kb = `${b.x},${b.y}`;
+    const sa = this.tilesByKey.get(ka);
+    const sb = this.tilesByKey.get(kb);
+    if (!sa || !sb) return;
+
+    this.tilesByKey.set(ka, sb);
+    this.tilesByKey.set(kb, sa);
+
+    sa.coord = { ...b };
+    sb.coord = { ...a };
+  }
+
+  applyDrops(drops: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }>) {
+    for (const m of drops) {
+      const fromKey = `${m.from.x},${m.from.y}`;
+      const toKey = `${m.to.x},${m.to.y}`;
+      const s = this.tilesByKey.get(fromKey);
+      if (!s) continue;
+      this.tilesByKey.delete(fromKey);
+      this.tilesByKey.set(toKey, s);
+      s.coord = { ...m.to };
+    }
+  }
+
+  createSpawns(
+    spawns: Array<{ to: { x: number; y: number }; tile: import('../../game/match3').TileId; spawnFromY: number }>,
+    layout: BoardLayout,
+  ): Array<{ sprite: TileSprite; fromY: number; toY: number }> {
+    const created: Array<{ sprite: TileSprite; fromY: number; toY: number }> = [];
+    const cellSize = layout.cellSize;
+
+    for (const s of spawns) {
+      const key = `${s.to.x},${s.to.y}`;
+      const ts = new TileSprite(s.tile, { ...s.to });
+      this.tilesByKey.set(key, ts);
+      this.root.addChild(ts.root);
+
+      const to = cellToWorld(layout, s.to);
+      const from = cellToWorld(layout, { x: s.to.x, y: s.spawnFromY });
+
+      ts.root.x = to.x + 2;
+      ts.root.y = from.y + 2;
+      ts.root.alpha = 0.7;
+      ts.render(cellSize);
+
+      created.push({ sprite: ts, fromY: ts.root.y, toY: to.y + 2 });
+    }
+
+    return created;
+  }
+
+  removeAt(cells: Array<{ x: number; y: number }>) {
+    for (const c of cells) {
+      const key = `${c.x},${c.y}`;
+      const s = this.tilesByKey.get(key);
+      if (!s) continue;
+      this.tilesByKey.delete(key);
+      s.root.destroy({ children: true });
+    }
+  }
+
+  setHighlight(cells: Array<{ x: number; y: number }>, on: boolean) {
+    for (const c of cells) {
+      const key = `${c.x},${c.y}`;
+      if (on) this.highlighted.add(key);
+      else this.highlighted.delete(key);
+      const s = this.tilesByKey.get(key);
+      if (s) s.root.tint = on ? 0xffffaa : 0xffffff;
+    }
+  }
+
+  snapToLayout(layout: BoardLayout) {
+    for (const [key, s] of this.tilesByKey.entries()) {
+      const [xStr, yStr] = key.split(',');
+      const x = Number(xStr);
+      const y = Number(yStr);
+      const p = cellToWorld(layout, { x, y });
+      s.root.x = p.x + 2;
+      s.root.y = p.y + 2;
     }
   }
 }
