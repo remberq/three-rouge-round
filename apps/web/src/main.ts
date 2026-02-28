@@ -4,7 +4,7 @@ import { DEFAULT_HERO } from './game/combat';
 import type { CombatState } from './game/combat';
 import { resolvePlayerMove } from './game/combat';
 import { initFloorCombat, initRunState, makeEmptyRunState, runReducer } from './game/run';
-import { selectEnemy } from './game/enemies';
+import { applyEnemyAbilities, ENEMY_DEF_BY_ID, selectEnemy } from './game/enemies';
 import type { RunState } from './game/run';
 import { clearRunFromLocalStorage, createOverlays, loadRunFromLocalStorage, saveRunToLocalStorage } from './ui/overlays';
 
@@ -274,6 +274,9 @@ async function main() {
       // After committing state, it's safe to do a full sync.
       syncLayout({ fullSync: true });
 
+      // Enemy abilities (run-level effects) based on combat events.
+      runState = applyEnemyAbilities(runState, res.events);
+
       // Run-screen transitions (MVP): react to combat status.
       if (state.status === 'won') {
         runState = runReducer(runState, { type: 'BattleEnded', result: 'won' });
@@ -297,6 +300,9 @@ async function main() {
   });
 
   // Debug hooks for Playwright e2e integration tests.
+  // Expose enemy defs for debug (Playwright only)
+  (window as unknown as Record<string, unknown>).__TRR_ENEMIES = ENEMY_DEF_BY_ID;
+
   (window as unknown as Record<string, unknown>).__TRR_DEBUG__ = {
     forceWin: () => {
       state = { ...state, status: 'won' };
@@ -310,6 +316,18 @@ async function main() {
       saveRunToLocalStorage(runState);
       overlays.render(runState);
     },
+    forceEnemyAttack: () => {
+      runState = applyEnemyAbilities(runState, [{ type: 'EnemyAttack', amount: 1, damageType: 'phys' }]);
+      saveRunToLocalStorage(runState);
+      overlays.render(runState);
+    },
+    getEnemyClawWeight: () => runState.config.enemyClawWeight,
+    setEnemy: (enemyId: string) => {
+      const def = ENEMY_DEF_BY_ID[enemyId];
+      if (def) runState = { ...runState, enemyDef: def };
+      overlays.render(runState);
+    },
+
   };
 
   // keep for now
