@@ -1,6 +1,6 @@
 import './style.css';
 
-import { DEFAULT_ENEMY, DEFAULT_HERO } from './game/combat';
+import { DEFAULT_HERO } from './game/combat';
 import type { CombatState } from './game/combat';
 import { resolvePlayerMove } from './game/combat';
 import { initFloorCombat, initRunState, makeEmptyRunState, runReducer } from './game/run';
@@ -51,7 +51,7 @@ async function main() {
 
   const makePreviewRun = (): RunState => {
     const base = makeEmptyRunState();
-    const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY });
+    const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, floorsCount: 5, heroDef: DEFAULT_HERO });
     return { ...base, seed: defaultSeed, combat, screen: 'start' };
   };
 
@@ -67,7 +67,7 @@ async function main() {
     // Ensure we always have a battle state available for rendering, even on Start screen.
     runState = {
       ...runState,
-      combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY }),
+      combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount, heroDef: DEFAULT_HERO }),
     };
   }
 
@@ -90,7 +90,7 @@ async function main() {
     if (!runState.combat) {
       runState = {
         ...runState,
-        combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY }),
+        combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount, heroDef: DEFAULT_HERO }),
       };
     }
 
