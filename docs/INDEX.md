@@ -22,3 +22,4 @@ This `docs/` folder is the **system of record** for specs, architecture, and pla
 ## References
 
 - Harness notes: `references/harness-engineering-notes.md`
+- QA / CLI flow (Playwright): `references/qa-cli-flow.md`
