@@ -1,8 +1,10 @@
 import './style.css';
 
-import { createRng, createBoard } from './game/match3';
 import { DEFAULT_ENEMY, DEFAULT_HERO } from './game/combat';
-import { initCombatState, resolvePlayerMove } from './game/combat';
+import { resolvePlayerMove } from './game/combat';
+import { initFloorCombat, initRunState, makeEmptyRunState, runReducer } from './game/run';
+import type { RunState } from './game/run';
+import { clearRunFromLocalStorage, createOverlays, loadRunFromLocalStorage, saveRunToLocalStorage } from './ui/overlays';
 
 import { createPixiApp } from './render/pixi/app';
 import { BoardView } from './render/board/boardView';
@@ -42,11 +44,33 @@ async function main() {
   // Force initial resize + layout sync.
   app.resize();
 
-  // Initial game state
-  const seed = 123;
-  const rng = createRng(seed);
-  const board = createBoard(rng, { width: 8, height: 8, allowInitialMatches: false });
-  let state = initCombatState({ hero: DEFAULT_HERO, enemy: DEFAULT_ENEMY, board, rngState: rng.getState() });
+  // --- Run state (EP-0004)
+  // Keep a battle initialized even on start screen so the baseline visuals remain stable.
+  const defaultSeed = 123;
+
+  const makePreviewRun = (): RunState => {
+    const base = makeEmptyRunState();
+    const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY });
+    return { ...base, seed: defaultSeed, combat, screen: 'start' };
+  };
+
+  let runState: RunState = makePreviewRun();
+  const loaded = loadRunFromLocalStorage();
+  if (loaded) {
+    // Show Start screen with Continue rather than auto-resuming.
+    runState = { ...loaded, screen: 'start' };
+  }
+
+  if (!runState.combat) {
+    // Ensure we always have a battle state available for rendering, even on Start screen.
+    runState = {
+      ...runState,
+      combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY }),
+    };
+  }
+
+  let state = runState.combat;
+  if (!state) throw new Error('Missing combat state');
 
   // Views
   const boardView = new BoardView();
@@ -55,6 +79,68 @@ async function main() {
   const hud = new HudView();
   app.stage.addChild(hud.root);
   hud.sync(state);
+
+  // UI overlays
+  const overlays = createOverlays({
+    onNewRun: (seed) => {
+      const s = seed ?? (Date.now() >>> 0);
+      runState = initRunState({ seed: s, floorsCount: 5 });
+      saveRunToLocalStorage(runState);
+
+      state = runState.combat!;
+      hud.sync(state);
+      boardView.syncBoard(state.board);
+      syncLayout({ fullSync: true });
+      overlays.render(runState);
+    },
+    onContinue: () => {
+      const loadedRun = loadRunFromLocalStorage();
+      if (!loadedRun) return;
+      runState = loadedRun;
+
+      if (!runState.combat) runState = runReducer(runState, { type: 'StartBattle' });
+      saveRunToLocalStorage(runState);
+
+      state = runState.combat!;
+      hud.sync(state);
+      boardView.syncBoard(state.board);
+      syncLayout({ fullSync: true });
+      overlays.render(runState);
+    },
+    onReset: () => {
+      clearRunFromLocalStorage();
+      runState = makePreviewRun();
+
+      state = runState.combat!;
+      hud.sync(state);
+      boardView.syncBoard(state.board);
+      syncLayout({ fullSync: true });
+      overlays.render(runState);
+    },
+    onNextBattle: () => {
+      runState = runReducer(runState, { type: 'NextFloor' });
+      saveRunToLocalStorage(runState);
+
+      state = runState.combat!;
+      hud.sync(state);
+      boardView.syncBoard(state.board);
+      syncLayout({ fullSync: true });
+      overlays.render(runState);
+    },
+    onStartNewAfterEnd: () => {
+      const s = Date.now() >>> 0;
+      runState = initRunState({ seed: s, floorsCount: 5 });
+      saveRunToLocalStorage(runState);
+
+      state = runState.combat!;
+      hud.sync(state);
+      boardView.syncBoard(state.board);
+      syncLayout({ fullSync: true });
+      overlays.render(runState);
+    },
+  });
+  overlays.mount(host);
+  overlays.render(runState);
 
   const animQueue = new AnimationQueue();
 
@@ -99,7 +185,7 @@ async function main() {
     app,
     () => layout,
     () => ({ width: state.board.width, height: state.board.height }),
-    () => animQueue.isRunning,
+    () => animQueue.isRunning || overlays.isBlockingInput(),
     async ({ a, b }) => {
       if (animQueue.isRunning) return;
 
@@ -148,12 +234,24 @@ async function main() {
 
       await animQueue.runSequential(app.ticker, steps);
 
-      // Commit state and sync HUD/board
+      // Commit combat state and sync HUD/board
       state = res.state;
+      runState = { ...runState, combat: state };
       hud.sync(state);
       boardView.syncBoard(state.board);
       // After committing state, it's safe to do a full sync.
       syncLayout({ fullSync: true });
+
+      // Run-screen transitions (MVP): react to combat status.
+      if (state.status === 'won') {
+        runState = runReducer(runState, { type: 'BattleEnded', result: 'won' });
+      } else if (state.status === 'lost') {
+        runState = runReducer(runState, { type: 'BattleEnded', result: 'lost' });
+      }
+
+      // Persist progress except on pure start screen.
+      if (runState.screen !== 'start') saveRunToLocalStorage(runState);
+      overlays.render(runState);
     },
   );
 
