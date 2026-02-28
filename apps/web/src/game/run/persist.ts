@@ -1,0 +1,75 @@
+import type { RunState } from './types';
+import { RUN_SCHEMA_VERSION } from './state';
+
+export const RUN_SAVE_KEY = 'three-rouge-round.run.save' as const;
+
+export type RunSaveEnvelopeV1 = {
+  schemaVersion: 1;
+  state: RunState;
+};
+
+function isObject(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+function isRunStateLike(x: unknown): x is RunState {
+  if (!isObject(x)) return false;
+  // Minimal structural checks (MVP). Avoid hard failures.
+  return (
+    x.schemaVersion === 1 &&
+    typeof x.seed === 'number' &&
+    typeof x.floorIndex === 'number' &&
+    typeof x.screen === 'string' &&
+    'config' in x
+  );
+}
+
+export function serializeRun(state: RunState): string {
+  const env: RunSaveEnvelopeV1 = {
+    schemaVersion: RUN_SCHEMA_VERSION,
+    state,
+  };
+  return JSON.stringify(env);
+}
+
+export function deserializeRun(raw: string): RunState | null {
+  try {
+    const env = JSON.parse(raw) as unknown;
+    if (!isObject(env)) return null;
+
+    if (env.schemaVersion !== RUN_SCHEMA_VERSION) return null;
+
+    const state = (env as any).state as unknown;
+    if (!isRunStateLike(state)) return null;
+
+    return state;
+  } catch {
+    return null;
+  }
+}
+
+export function saveRun(storage: Pick<Storage, 'setItem'>, state: RunState): void {
+  try {
+    storage.setItem(RUN_SAVE_KEY, serializeRun(state));
+  } catch {
+    // Ignore (quota/private mode). Persistence is best-effort.
+  }
+}
+
+export function loadRun(storage: Pick<Storage, 'getItem'>): RunState | null {
+  try {
+    const raw = storage.getItem(RUN_SAVE_KEY);
+    if (!raw) return null;
+    return deserializeRun(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function clearRun(storage: Pick<Storage, 'removeItem'>): void {
+  try {
+    storage.removeItem(RUN_SAVE_KEY);
+  } catch {
+    // ignore
+  }
+}

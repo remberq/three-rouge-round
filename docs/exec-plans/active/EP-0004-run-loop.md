@@ -53,8 +53,8 @@ Decision to be recorded in docs/design-docs.
 ## Tasks
 
 - [ ] Docs: create product spec `docs/product-specs/run-loop.md`
-- [ ] Docs: update design doc `docs/design-docs/state-model.md` with RunState + transitions
-- [ ] Create `RunState` model + reducer in `apps/web/src/game/run/**`
+- [x] Docs: update design doc `docs/design-docs/state-model.md` with RunState + transitions
+- [x] Create `RunState` model + reducer in `apps/web/src/game/run/**`
 - [ ] Add start screen: New Run / Continue / Reset
 - [ ] Add end screen: Victory/Defeat
 - [ ] Add between-fights screen (MVP): Floor N/M + “Next battle” button
@@ -63,14 +63,35 @@ Decision to be recorded in docs/design-docs.
 - [ ] Tests:
   - [ ] serialize/deserialize + schema version fallback
   - [ ] deterministic New Run seed produces same initial RunState
-- [ ] Quality gates: pnpm lint/typecheck/test/docs:lint
+- [ ] QA (required): write test cases + verify via Playwright CLI (Chromium)
+- [ ] Quality gates: npm lint/typecheck/test/docs:lint (via nvm)
+
+## Test cases
+
+- **TC-PERSIST-001: Save run on New Run**
+  - Preconditions: localStorage empty
+  - Steps: start a new run → trigger a state change
+  - Expected: save key exists; refresh allows Continue
+
+- **TC-PERSIST-002: Continue restores same run**
+  - Preconditions: a saved run exists
+  - Steps: refresh → continue
+  - Expected: seed/floor match previous; combat state is restored
+
+- **TC-PERSIST-003: Reset clears save**
+  - Steps: reset → refresh
+  - Expected: no continue; save key removed
+
+- **TC-PERSIST-004: Corrupted/mismatched save fails safely**
+  - Steps: write invalid JSON or schemaVersion mismatch → refresh
+  - Expected: app does not crash; save ignored/cleared
 
 ## Tests
 
-- `pnpm lint`
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm docs:lint`
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test`
+- `npm run docs:lint`
 
 ## Decisions
 
