@@ -1,7 +1,8 @@
-import type { Board, CascadeStep, Coord, DropMove, SpawnMove, SpawnedTile, TileId } from './types';
+import type { Board, CascadeStep, Coord, DropMove, SpawnMove, SpawnedTile, TileId, TileWeights } from './types';
 import { cloneBoard, setTile } from './board';
 import type { Rng } from './rng';
 import { findMatches, matchCells } from './detect';
+import { pickWeightedTile } from './tilePool';
 
 export type ResolveResult = {
   board: Board;
@@ -50,7 +51,12 @@ export function applyGravityWithMoves(_before: Board, after: Board): DropMove[] 
   return drops;
 }
 
-export function fillEmptiesWithMoves(board: Board, rng: Rng, tileIds: readonly TileId[]): {
+export function fillEmptiesWithMoves(
+  board: Board,
+  rng: Rng,
+  tileIds: readonly TileId[],
+  tileWeights?: TileWeights,
+): {
   spawnedTiles: SpawnedTile[];
   spawns: SpawnMove[];
 } {
@@ -70,7 +76,7 @@ export function fillEmptiesWithMoves(board: Board, rng: Rng, tileIds: readonly T
       const i = y * board.width + x;
       if (board.tiles[i] !== null) continue;
 
-      const tile = tileIds[rng.nextInt(tileIds.length)];
+      const tile = pickWeightedTile(rng, tileIds, tileWeights);
       board.tiles[i] = tile;
 
       spawnedTiles.push({ at: { x, y }, tile });
@@ -82,7 +88,7 @@ export function fillEmptiesWithMoves(board: Board, rng: Rng, tileIds: readonly T
   return { spawnedTiles, spawns };
 }
 
-export function resolveCascades(initial: Board, rng: Rng, tileIds: readonly TileId[]): ResolveResult {
+export function resolveCascades(initial: Board, rng: Rng, tileIds: readonly TileId[], tileWeights?: TileWeights): ResolveResult {
   const board = cloneBoard(initial);
   const steps: CascadeStep[] = [];
 
@@ -98,7 +104,7 @@ export function resolveCascades(initial: Board, rng: Rng, tileIds: readonly Tile
     clearCells(board, clearedCells);
 
     const drops = applyGravityWithMoves(beforeStep, board);
-    const { spawnedTiles, spawns } = fillEmptiesWithMoves(board, rng, tileIds);
+    const { spawnedTiles, spawns } = fillEmptiesWithMoves(board, rng, tileIds, tileWeights);
 
     steps.push({ matches, clearedCells, drops, spawns, spawnedTiles });
   }

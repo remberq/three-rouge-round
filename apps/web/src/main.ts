@@ -52,7 +52,7 @@ async function main() {
 
   const makePreviewRun = (): RunState => {
     const base = makeEmptyRunState();
-    const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, floorsCount: 5, heroDef: DEFAULT_HERO });
+    const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, floorsCount: 5, enemyClawWeight: 1, heroDef: DEFAULT_HERO });
     const enemyDef = selectEnemy({ seed: defaultSeed, floorIndex: 0, floorsCount: 5 });
     return { ...base, seed: defaultSeed, enemyDef, combat, screen: 'start' };
   };
@@ -69,7 +69,13 @@ async function main() {
     // Ensure we always have a battle state available for rendering, even on Start screen.
     runState = {
       ...runState,
-      combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount, heroDef: DEFAULT_HERO }),
+      combat: initFloorCombat({
+        seed: runState.seed,
+        floorIndex: runState.floorIndex,
+        floorsCount: runState.config.floorsCount,
+        enemyClawWeight: runState.config.enemyClawWeight,
+        heroDef: DEFAULT_HERO,
+      }),
     };
   }
 
@@ -93,7 +99,13 @@ async function main() {
       runState = {
         ...runState,
         enemyDef: selectEnemy({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount }),
-        combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount, heroDef: DEFAULT_HERO }),
+        combat: initFloorCombat({
+          seed: runState.seed,
+          floorIndex: runState.floorIndex,
+          floorsCount: runState.config.floorsCount,
+          enemyClawWeight: runState.config.enemyClawWeight,
+          heroDef: DEFAULT_HERO,
+        }),
       };
     }
 
@@ -203,7 +215,13 @@ async function main() {
     async ({ a, b }) => {
       if (animQueue.isRunning) return;
 
-      const res = resolvePlayerMove(state, a, b);
+      const res = resolvePlayerMove(state, a, b, {
+        enemy: runState.enemyDef,
+        tileWeights: {
+          C: runState.config.enemyClawWeight,
+          ...(runState.enemyDef.tileWeights ?? {}),
+        },
+      });
       const swap = res.swapResult;
 
       if (!swap || !swap.ok) {

@@ -1,11 +1,11 @@
-import type { Board, Coord, SwapResult } from './types';
+import type { Board, Coord, SwapResult, TileWeights } from './types';
 import { TILE_IDS } from './types';
 import { areNeighbors, cloneBoard, getTile, setTile } from './board';
 import type { Rng } from './rng';
 import { findMatches } from './detect';
 import { resolveCascades } from './resolve';
 
-export function trySwap(board: Board, a: Coord, b: Coord, rng: Rng): SwapResult {
+export function trySwap(board: Board, a: Coord, b: Coord, rng: Rng, tileWeights?: TileWeights): SwapResult {
   if (!areNeighbors(a, b)) throw new Error('Swap coords must be neighbors');
 
   const original = cloneBoard(board);
@@ -21,7 +21,7 @@ export function trySwap(board: Board, a: Coord, b: Coord, rng: Rng): SwapResult 
     return { ok: false, swapped: [a, b], matches: [], cascades: [], finalBoard: original };
   }
 
-  const resolved = resolveCascades(working, rng, TILE_IDS);
+  const resolved = resolveCascades(working, rng, TILE_IDS, tileWeights);
 
   return {
     ok: true,

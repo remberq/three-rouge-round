@@ -6,6 +6,9 @@ export type RunEndResult = 'victory' | 'defeat';
 
 export type RunConfig = {
   floorsCount: number;
+
+  // EP-0006.2: base weight for enemyClaw tile (C)
+  enemyClawWeight: number;
 };
 
 export type RunState = {

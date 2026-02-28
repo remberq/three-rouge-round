@@ -6,3 +6,4 @@ export * from './detect';
 export * from './generate';
 export * from './resolve';
 export * from './swap';
+export * from './tilePool';

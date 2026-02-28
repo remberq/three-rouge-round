@@ -28,6 +28,9 @@ function isRunStateLike(x: unknown): x is RunState {
   const floorsCount = (cfg as Record<string, unknown>).floorsCount;
   if (typeof floorsCount !== 'number' || !Number.isFinite(floorsCount) || floorsCount < 1) return false;
 
+  const enemyClawWeight = (cfg as Record<string, unknown>).enemyClawWeight;
+  if (typeof enemyClawWeight !== 'number' || !Number.isFinite(enemyClawWeight) || enemyClawWeight <= 0) return false;
+
   // Soft checks for fields used by UI flow.
   const endResult = (x as Record<string, unknown>).endResult;
   if (endResult !== null && endResult !== 'victory' && endResult !== 'defeat') return false;

@@ -1,5 +1,7 @@
 export type TileId = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 
+export type TileWeights = Partial<Record<TileId, number>>;
+
 export const TILE_IDS: readonly TileId[] = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
 
 export type Coord = { x: number; y: number };
