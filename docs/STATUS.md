@@ -20,9 +20,10 @@
 
 ## What’s next
 
-- Finish EP-0000 (scaffold web app + CI + docs-lint).
+- Complete EP-0004 docs + tighten run flow (then move to EP-0005 rewards/upgrades).
 
 ## Next EP suggestions
 
-- EP-0003: connect combat+match3 to a renderer-facing event stream + minimal debug UI.
-- EP-0004: richer combat intents/effects (buffs/debuffs), enemy AI intents.
+- EP-0005: rewards/upgrades (3 choices) + data-driven upgrades.
+- EP-0006: enemy roster + abilities.
+- EP-0007: scaling/map-lite.
