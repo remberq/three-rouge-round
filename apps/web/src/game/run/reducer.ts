@@ -32,6 +32,8 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         floorIndex: state.floorIndex,
         floorsCount: state.config.floorsCount,
         enemyClawWeight: state.config.enemyClawWeight,
+        enemyPerFloorMultiplier: state.config.enemyPerFloorMultiplier,
+        bossMultiplier: state.config.bossMultiplier,
         heroDef: DEFAULT_HERO,
       });
 
@@ -77,6 +79,8 @@ export function runReducer(state: RunState, action: RunAction): RunState {
           floorIndex: nextFloorIndex,
           floorsCount: state.config.floorsCount,
           enemyClawWeight: state.config.enemyClawWeight,
+          enemyPerFloorMultiplier: state.config.enemyPerFloorMultiplier,
+          bossMultiplier: state.config.bossMultiplier,
           heroDef: DEFAULT_HERO,
         }),
       };

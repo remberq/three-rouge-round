@@ -28,10 +28,20 @@ function isRunStateLike(x: unknown): x is RunState {
   const floorsCount = (cfg as Record<string, unknown>).floorsCount;
   if (typeof floorsCount !== 'number' || !Number.isFinite(floorsCount) || floorsCount < 1) return false;
 
-  // Back-compat: older EP-0004/5 saves won't have this field.
+  // Back-compat: older EP-0004/5 saves won't have these fields.
   const enemyClawWeight = (cfg as Record<string, unknown>).enemyClawWeight;
   if (enemyClawWeight !== undefined) {
     if (typeof enemyClawWeight !== 'number' || !Number.isFinite(enemyClawWeight) || enemyClawWeight <= 0) return false;
+  }
+
+  const enemyPerFloorMultiplier = (cfg as Record<string, unknown>).enemyPerFloorMultiplier;
+  if (enemyPerFloorMultiplier !== undefined) {
+    if (typeof enemyPerFloorMultiplier !== 'number' || !Number.isFinite(enemyPerFloorMultiplier) || enemyPerFloorMultiplier < 0) return false;
+  }
+
+  const bossMultiplier = (cfg as Record<string, unknown>).bossMultiplier;
+  if (bossMultiplier !== undefined) {
+    if (typeof bossMultiplier !== 'number' || !Number.isFinite(bossMultiplier) || bossMultiplier < 1) return false;
   }
 
   // Soft checks for fields used by UI flow.
@@ -64,9 +74,9 @@ export function deserializeRun(raw: string): RunState | null {
       const cfg = (state as Record<string, unknown>).config;
       if (typeof cfg === 'object' && cfg !== null) {
         const cfgObj = cfg as Record<string, unknown>;
-        if (cfgObj.enemyClawWeight === undefined) {
-          cfgObj.enemyClawWeight = 1;
-        }
+        if (cfgObj.enemyClawWeight === undefined) cfgObj.enemyClawWeight = 1;
+        if (cfgObj.enemyPerFloorMultiplier === undefined) cfgObj.enemyPerFloorMultiplier = 0.12;
+        if (cfgObj.bossMultiplier === undefined) cfgObj.bossMultiplier = 1.35;
       }
     }
 
