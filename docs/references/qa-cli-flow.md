@@ -68,3 +68,11 @@ A PR is mergeable only if:
 
 - Test cases are written in docs
 - CLI-driven Playwright verification passes (or a short note explains why it’s skipped)
+- **CI is green on GitHub** (no failed checks). Always verify on the PR:
+  - GitHub UI checks, or
+  - `gh pr checks <PR>`
+
+If CI fails:
+- read failed logs (`gh run view <runId> --log-failed`)
+- fix and push
+- re-check until all checks pass

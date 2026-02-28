@@ -58,16 +58,32 @@ Decision to be recorded in docs/design-docs.
 - [ ] Add start screen: New Run / Continue / Reset
 - [ ] Add end screen: Victory/Defeat
 - [ ] Add between-fights screen (MVP): Floor N/M + “Next battle” button
-- [ ] Screenshot regression baseline (Playwright): capture current battle screen before UI changes
+- [x] Screenshot regression baseline (Playwright): capture current battle screen before UI changes
 - [ ] Integrate battle screen with existing combat+render pipeline
-- [ ] Persistence: localStorage save/load, schemaVersion + safe reset
-- [ ] Tests:
-  - [ ] serialize/deserialize + schema version fallback
-  - [ ] deterministic New Run seed produces same initial RunState
+- [x] Persistence: localStorage save/load, schemaVersion + safe reset
+- [x] Tests:
+  - [x] serialize/deserialize + schema version fallback
+  - [x] deterministic New Run seed produces same initial RunState
 - [ ] QA (required): write test cases + verify via Playwright CLI (Chromium)
 - [ ] Quality gates: npm lint/typecheck/test/docs:lint (via nvm)
 
 ## Test cases
+
+- **TC-UI-001: Start screen overlay does not break battle UI**
+  - Preconditions: app loads
+  - Steps: open app → ensure Start overlay visible → click New Run
+  - Expected: overlay hides; board+HUD look the same as baseline screenshot
+
+- **TC-UI-002: Continue is available only when a save exists**
+  - Preconditions: none
+  - Steps: open app with empty localStorage
+  - Expected: Continue button hidden/disabled
+
+- **TC-UI-003: Reset clears save and returns to Start**
+  - Preconditions: a save exists
+  - Steps: click Reset → refresh
+  - Expected: Continue is not available
+
 
 - **TC-PERSIST-001: Save run on New Run**
   - Preconditions: localStorage empty
