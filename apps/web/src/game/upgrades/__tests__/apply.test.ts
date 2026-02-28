@@ -18,6 +18,13 @@ describe('applyUpgrade', () => {
     expect(s1).toEqual(s0);
   });
 
+  it('clears stale endResult', () => {
+    const s0 = initRunState({ seed: 1, floorsCount: 5 });
+    const sEnded = { ...s0, screen: 'between' as const, endResult: 'victory' as const };
+    const s1 = applyUpgrade(sEnded, 'stat.atk+1');
+    expect(s1.endResult).toBeNull();
+  });
+
   it('does not mutate original state', () => {
     const s0 = initRunState({ seed: 1, floorsCount: 5 });
     applyUpgrade(s0, 'stat.atk+1');

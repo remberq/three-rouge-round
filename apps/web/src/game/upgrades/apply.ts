@@ -5,7 +5,8 @@ export function applyUpgrade(state: RunState, upgradeId: string): RunState {
   const def = UPGRADE_DEF_BY_ID[upgradeId];
   if (!def) return state;
 
-  // Ensure we don't keep a stale endResult if applying upgrades between fights.
+  // Clear any stale terminal flag when applying upgrades to an ongoing run.
+  // (Prevents StartBattle guard from soft-locking progression.)
   const next = def.apply(state);
-  return { ...next, endResult: next.endResult };
+  return { ...next, endResult: null };
 }
