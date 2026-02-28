@@ -59,6 +59,7 @@ async function main() {
   const loaded = loadRunFromLocalStorage();
   if (loaded) {
     // Show Start screen with Continue rather than auto-resuming.
+    // The saved state will be restored when the user presses Continue.
     runState = { ...loaded, screen: 'start' };
   }
 
@@ -83,87 +84,65 @@ async function main() {
   app.stage.addChild(hud.root);
   hud.sync(state);
 
+  const syncFromRun = (next: RunState) => {
+    runState = next;
+
+    if (!runState.combat) {
+      runState = {
+        ...runState,
+        combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY }),
+      };
+    }
+
+    const combat = runState.combat;
+    if (!combat) throw new Error('Missing combat state after syncFromRun');
+    state = combat;
+    hud.sync(state);
+    boardView.syncBoard(state.board);
+    syncLayout({ fullSync: true });
+    overlays.render(runState);
+  };
+
   // UI overlays
   const overlays = createOverlays({
     onNewRun: (seed) => {
       const s = seed ?? (Date.now() >>> 0);
-      runState = initRunState({ seed: s, floorsCount: 5 });
-      saveRunToLocalStorage(runState);
-
-      state = runState.combat!;
-      hud.sync(state);
-      boardView.syncBoard(state.board);
-      syncLayout({ fullSync: true });
-      overlays.render(runState);
+      const next = initRunState({ seed: s, floorsCount: 5 });
+      saveRunToLocalStorage(next);
+      syncFromRun(next);
     },
     onContinue: () => {
       const loadedRun = loadRunFromLocalStorage();
       if (!loadedRun) return;
 
-      // If the run already ended, resume into the end screen.
+      // Ended run → end screen.
       if (loadedRun.endResult) {
-        runState = { ...loadedRun, screen: 'end' };
-        overlays.render(runState);
-        // Keep current battle visuals; user can start a new run from End screen.
+        const next = { ...loadedRun, screen: 'end' as const };
+        saveRunToLocalStorage(next);
+        syncFromRun(next);
         return;
       }
 
-      // Active run: ensure we have combat state.
-      runState = { ...loadedRun, screen: 'battle' };
-
-      if (!runState.combat) {
-        // Safe fallback for corrupted/tampered saves.
-        runState = {
-          ...runState,
-          combat: initFloorCombat({
-            seed: runState.seed,
-            floorIndex: runState.floorIndex,
-            heroDef: DEFAULT_HERO,
-            enemyDef: DEFAULT_ENEMY,
-          }),
-        };
-      }
-
-      saveRunToLocalStorage(runState);
-
-      const combat = runState.combat;
-      if (!combat) throw new Error('Missing combat state after Continue');
-      state = combat;
-      hud.sync(state);
-      boardView.syncBoard(state.board);
-      syncLayout({ fullSync: true });
-      overlays.render(runState);
+      // Restore whatever screen we were on (battle/between).
+      const next = { ...loadedRun };
+      saveRunToLocalStorage(next);
+      syncFromRun(next);
     },
     onReset: () => {
       clearRunFromLocalStorage();
-      runState = makePreviewRun();
-
-      state = runState.combat!;
-      hud.sync(state);
-      boardView.syncBoard(state.board);
-      syncLayout({ fullSync: true });
-      overlays.render(runState);
+      const next = makePreviewRun();
+      syncFromRun(next);
     },
     onNextBattle: () => {
-      runState = runReducer(runState, { type: 'NextFloor' });
-      saveRunToLocalStorage(runState);
-
-      state = runState.combat!;
-      hud.sync(state);
-      boardView.syncBoard(state.board);
-      syncLayout({ fullSync: true });
-      overlays.render(runState);
+      const next = runReducer(runState, { type: 'NextFloor' });
+      saveRunToLocalStorage(next);
+      syncFromRun(next);
     },
     onStartNewAfterEnd: () => {
       const s = Date.now() >>> 0;
-      runState = initRunState({ seed: s, floorsCount: 5 });
-      saveRunToLocalStorage(runState);
-
-      state = runState.combat!;
-      hud.sync(state);
-      boardView.syncBoard(state.board);
-      syncLayout({ fullSync: true });
-      overlays.render(runState);
+      const next = initRunState({ seed: s, floorsCount: 5 });
+      saveRunToLocalStorage(next);
+      syncFromRun(next);
     },
   });
   overlays.mount(host);
@@ -290,6 +269,22 @@ async function main() {
     lastSelected = sel ? { ...sel } : null;
     boardView.setSelected(lastSelected);
   });
+
+  // Debug hooks for Playwright e2e integration tests.
+  (window as unknown as Record<string, unknown>).__TRR_DEBUG__ = {
+    forceWin: () => {
+      state = { ...state, status: 'won' };
+      runState = runReducer({ ...runState, combat: state }, { type: 'BattleEnded', result: 'won' });
+      saveRunToLocalStorage(runState);
+      overlays.render(runState);
+    },
+    forceLose: () => {
+      state = { ...state, status: 'lost' };
+      runState = runReducer({ ...runState, combat: state }, { type: 'BattleEnded', result: 'lost' });
+      saveRunToLocalStorage(runState);
+      overlays.render(runState);
+    },
+  };
 
   // keep for now
   void input;

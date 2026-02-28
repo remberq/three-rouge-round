@@ -59,7 +59,7 @@ Decision to be recorded in docs/design-docs.
 - [ ] Add end screen: Victory/Defeat
 - [ ] Add between-fights screen (MVP): Floor N/M + “Next battle” button
 - [x] Screenshot regression baseline (Playwright): capture current battle screen before UI changes
-- [ ] Integrate battle screen with existing combat+render pipeline
+- [ ] Integrate battle screen with existing combat+render pipeline (issue #18)
 - [x] Persistence: localStorage save/load, schemaVersion + safe reset
 - [x] Tests:
   - [x] serialize/deserialize + schema version fallback
@@ -83,6 +83,26 @@ Decision to be recorded in docs/design-docs.
   - Preconditions: a save exists
   - Steps: click Reset → refresh
   - Expected: Continue is not available
+
+- **TC-INTEG-001: Win transitions to Between screen and blocks input**
+  - Preconditions: in battle
+  - Steps: force a win (debug/test hook) or play until enemy hp=0
+  - Expected: Between overlay appears; board input blocked
+
+- **TC-INTEG-002: Next battle starts new combat state on next floor**
+  - Preconditions: Between screen visible after win
+  - Steps: click Next battle
+  - Expected: battle screen shows; floorIndex increments; combat resets
+
+- **TC-INTEG-003: Lose transitions to End screen**
+  - Preconditions: in battle
+  - Steps: force a loss (debug/test hook) or play until hero hp=0
+  - Expected: End overlay appears with Defeat
+
+- **TC-INTEG-004: Refresh after Between/End resumes into Start with Continue**
+  - Preconditions: reach Between or End so save exists
+  - Steps: refresh
+  - Expected: Start screen shows; Continue enabled; clicking Continue restores correct overlay state
 
 
 - **TC-PERSIST-001: Save run on New Run**
