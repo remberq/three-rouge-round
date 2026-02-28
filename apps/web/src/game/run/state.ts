@@ -1,5 +1,6 @@
 import { createBoard, createRng } from '../match3';
-import { DEFAULT_ENEMY, DEFAULT_HERO, initCombatState } from '../combat';
+import { DEFAULT_HERO, initCombatState } from '../combat';
+import { selectEnemy } from '../enemies';
 import type { RunConfig, RunState } from './types';
 
 export const RUN_SCHEMA_VERSION = 1 as const;
@@ -20,7 +21,7 @@ export function makeEmptyRunState(): RunState {
     combat: null,
     endResult: null,
     heroDef: DEFAULT_HERO,
-    enemyDef: DEFAULT_ENEMY,
+    enemyDef: selectEnemy({ seed: 0, floorIndex: 0, floorsCount: 5 }),
   };
 }
 
@@ -28,7 +29,7 @@ export function initRunState(params: { seed: number; floorsCount?: number }): Ru
   const config = defaultRunConfig({ floorsCount: params.floorsCount });
 
   const heroDef = DEFAULT_HERO;
-  const enemyDef = DEFAULT_ENEMY;
+  const enemyDef = selectEnemy({ seed: params.seed, floorIndex: 0, floorsCount: config.floorsCount });
 
   return {
     schemaVersion: RUN_SCHEMA_VERSION,
@@ -36,7 +37,7 @@ export function initRunState(params: { seed: number; floorsCount?: number }): Ru
     config,
     screen: 'battle',
     floorIndex: 0,
-    combat: initFloorCombat({ seed: params.seed, floorIndex: 0, heroDef, enemyDef }),
+    combat: initFloorCombat({ seed: params.seed, floorIndex: 0, floorsCount: config.floorsCount, heroDef }),
     endResult: null,
     heroDef,
     enemyDef,
@@ -46,12 +47,14 @@ export function initRunState(params: { seed: number; floorsCount?: number }): Ru
 export function initFloorCombat(params: {
   seed: number;
   floorIndex: number;
+  floorsCount: number;
   heroDef: typeof DEFAULT_HERO;
-  enemyDef: typeof DEFAULT_ENEMY;
 }) {
   // NOTE: deterministic per floor. For MVP we just offset the seed.
   const rng = createRng((params.seed + params.floorIndex * 10_000) >>> 0);
   const board = createBoard(rng, { width: 8, height: 8, allowInitialMatches: false });
 
-  return initCombatState({ hero: params.heroDef, enemy: params.enemyDef, board, rngState: rng.getState() });
+  const enemyDef = selectEnemy({ seed: params.seed, floorIndex: params.floorIndex, floorsCount: params.floorsCount });
+
+  return initCombatState({ hero: params.heroDef, enemy: enemyDef, board, rngState: rng.getState() });
 }

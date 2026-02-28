@@ -24,10 +24,21 @@ Add an MVP enemy roster (≥3 enemies + 1 boss) with distinct stats and at least
 ## Tasks
 
 - [ ] Product spec updates: `docs/product-specs/enemies.md`, `docs/product-specs/tiles.md`
-- [ ] Add enemy data + selection
-- [ ] Implement ability triggers (MVP)
+- [ ] EnemyDefs + deterministic selection by floor (issue #31)
+- [ ] Enemy tile weights integration (issue #32)
+- [ ] Enemy abilities (MVP triggers) (issue #33)
 - [ ] Integrate with run loop
 - [ ] Tests + quality gates
+
+## Test cases
+
+- **TC-ENEMY-001: deterministic enemy selection**
+  - Steps: select enemy twice with same (seed,floorIndex)
+  - Expected: same enemy id
+
+- **TC-ENEMY-002: boss appears on last floor**
+  - Steps: select enemy on last floor
+  - Expected: boss id
 
 ## Tests
 
