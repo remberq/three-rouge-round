@@ -34,9 +34,15 @@ describe('run persistence', () => {
   });
 
   it('deserialize returns null on malformed config', () => {
-    const state = initRunState({ seed: 1, floorsCount: 5 }) as any;
-    state.config = { floorsCount: 'nope' };
-    const raw = JSON.stringify({ schemaVersion: 1, state });
+    const valid = initRunState({ seed: 1, floorsCount: 5 });
+
+    // Create a deliberately malformed payload without using `any`.
+    const malformedState = {
+      ...valid,
+      config: { floorsCount: 'nope' },
+    };
+
+    const raw = JSON.stringify({ schemaVersion: 1, state: malformedState });
     expect(deserializeRun(raw)).toBeNull();
   });
 

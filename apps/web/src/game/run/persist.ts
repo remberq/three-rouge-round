@@ -23,13 +23,13 @@ function isRunStateLike(x: unknown): x is RunState {
 
   if (x.screen !== 'start' && x.screen !== 'battle' && x.screen !== 'between' && x.screen !== 'end') return false;
 
-  const cfg = (x as any).config as unknown;
+  const cfg = (x as Record<string, unknown>).config;
   if (!isObject(cfg)) return false;
-  const floorsCount = (cfg as any).floorsCount;
+  const floorsCount = (cfg as Record<string, unknown>).floorsCount;
   if (typeof floorsCount !== 'number' || !Number.isFinite(floorsCount) || floorsCount < 1) return false;
 
   // Soft checks for fields used by UI flow.
-  const endResult = (x as any).endResult;
+  const endResult = (x as Record<string, unknown>).endResult;
   if (endResult !== null && endResult !== 'victory' && endResult !== 'defeat') return false;
 
   return true;
@@ -50,7 +50,7 @@ export function deserializeRun(raw: string): RunState | null {
 
     if (env.schemaVersion !== RUN_SCHEMA_VERSION) return null;
 
-    const state = (env as any).state as unknown;
+    const state = (env as Record<string, unknown>).state as unknown;
     if (!isRunStateLike(state)) return null;
 
     return state;
