@@ -14,14 +14,25 @@ function isObject(x: unknown): x is Record<string, unknown> {
 
 function isRunStateLike(x: unknown): x is RunState {
   if (!isObject(x)) return false;
-  // Minimal structural checks (MVP). Avoid hard failures.
-  return (
-    x.schemaVersion === 1 &&
-    typeof x.seed === 'number' &&
-    typeof x.floorIndex === 'number' &&
-    typeof x.screen === 'string' &&
-    'config' in x
-  );
+
+  // Minimal structural checks (MVP). Avoid hard failures, but reject obviously
+  // malformed/tampered payloads so `loadRun()` is a safe fallback.
+  if (x.schemaVersion !== 1) return false;
+  if (typeof x.seed !== 'number') return false;
+  if (typeof x.floorIndex !== 'number' || !Number.isFinite(x.floorIndex) || x.floorIndex < 0) return false;
+
+  if (x.screen !== 'start' && x.screen !== 'battle' && x.screen !== 'between' && x.screen !== 'end') return false;
+
+  const cfg = (x as any).config as unknown;
+  if (!isObject(cfg)) return false;
+  const floorsCount = (cfg as any).floorsCount;
+  if (typeof floorsCount !== 'number' || !Number.isFinite(floorsCount) || floorsCount < 1) return false;
+
+  // Soft checks for fields used by UI flow.
+  const endResult = (x as any).endResult;
+  if (endResult !== null && endResult !== 'victory' && endResult !== 'defeat') return false;
+
+  return true;
 }
 
 export function serializeRun(state: RunState): string {

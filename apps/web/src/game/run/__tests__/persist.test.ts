@@ -33,6 +33,13 @@ describe('run persistence', () => {
     expect(deserializeRun(raw)).toBeNull();
   });
 
+  it('deserialize returns null on malformed config', () => {
+    const state = initRunState({ seed: 1, floorsCount: 5 }) as any;
+    state.config = { floorsCount: 'nope' };
+    const raw = JSON.stringify({ schemaVersion: 1, state });
+    expect(deserializeRun(raw)).toBeNull();
+  });
+
   it('saveRun writes to key and loadRun reads it', () => {
     const storage = makeMemStorage();
     const state = initRunState({ seed: 7, floorsCount: 3 });
