@@ -2,6 +2,7 @@ import './overlays.css';
 
 import { clearRun, loadRun, makeEmptyRunState, RUN_SAVE_KEY, saveRun } from '../game/run';
 import type { RunState } from '../game/run';
+import { generateRewardChoices, UPGRADE_DEF_BY_ID } from '../game/upgrades';
 
 export type OverlayApi = {
   mount(host: HTMLElement): void;
@@ -14,6 +15,7 @@ type Handlers = {
   onNewRun: (seed?: number) => void;
   onContinue: () => void;
   onReset: () => void;
+  onChooseUpgrade: (upgradeId: string) => void;
   onNextBattle: () => void;
   onStartNewAfterEnd: () => void;
 };
@@ -75,6 +77,55 @@ export function createOverlays(handlers: Handlers): OverlayApi {
     return card;
   };
 
+  const renderReward = (state: RunState) => {
+    const card = document.createElement('div');
+    card.className = 'overlay-card';
+    card.setAttribute('data-screen', 'reward');
+
+    const h = document.createElement('h1');
+    h.textContent = 'Choose an upgrade';
+
+    const p = document.createElement('p');
+    p.textContent = 'Pick 1 of 3.';
+
+    const choices = generateRewardChoices({ seed: state.seed, floorIndex: state.floorIndex });
+
+    const list = document.createElement('div');
+    list.style.display = 'grid';
+    list.style.gap = '10px';
+
+    for (const c of choices) {
+      const def = UPGRADE_DEF_BY_ID[c.id];
+      const item = document.createElement('div');
+      item.style.padding = '10px';
+      item.style.borderRadius = '10px';
+      item.style.border = '1px solid rgba(255,255,255,0.12)';
+      item.style.background = 'rgba(255,255,255,0.06)';
+
+      const name = document.createElement('div');
+      name.textContent = def?.name ?? c.id;
+      name.style.fontWeight = '600';
+
+      const desc = document.createElement('div');
+      desc.textContent = def?.description ?? '';
+      desc.style.opacity = '0.85';
+      desc.style.marginTop = '4px';
+
+      const actions = document.createElement('div');
+      actions.className = 'overlay-actions';
+
+      const pick = makeButton('Pick', { primary: true });
+      pick.onclick = () => handlers.onChooseUpgrade(c.id);
+      actions.append(pick);
+
+      item.append(name, desc, actions);
+      list.append(item);
+    }
+
+    card.append(h, p, list);
+    return card;
+  };
+
   const renderBetween = (state: RunState) => {
     const card = document.createElement('div');
     card.className = 'overlay-card';
@@ -124,6 +175,11 @@ export function createOverlays(handlers: Handlers): OverlayApi {
 
     if (state.screen === 'start') {
       setCard(renderStart());
+      return;
+    }
+
+    if (state.screen === 'reward') {
+      setCard(renderReward(state));
       return;
     }
 

@@ -1,6 +1,6 @@
 import type { CombatState, EnemyDef, HeroDef } from '../combat';
 
-export type RunScreen = 'start' | 'battle' | 'between' | 'end';
+export type RunScreen = 'start' | 'battle' | 'reward' | 'between' | 'end';
 
 export type RunEndResult = 'victory' | 'defeat';
 
@@ -35,4 +35,5 @@ export type RunAction =
   | { type: 'ResetRun' }
   | { type: 'StartBattle' }
   | { type: 'BattleEnded'; result: 'won' | 'lost' }
+  | { type: 'UpgradeChosen'; upgradeId: string }
   | { type: 'NextFloor' };

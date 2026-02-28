@@ -14,10 +14,10 @@ describe('runReducer', () => {
     expect(s1.combat).not.toBeNull();
   });
 
-  it('BattleEnded(won) -> between (non-last floor)', () => {
+  it('BattleEnded(won) -> reward (non-last floor)', () => {
     const s0 = initRunState({ seed: 1, floorsCount: 5 });
     const s1 = runReducer(s0, { type: 'BattleEnded', result: 'won' });
-    expect(s1.screen).toBe('between');
+    expect(s1.screen).toBe('reward');
   });
 
   it('BattleEnded(won) -> victory on last floor', () => {

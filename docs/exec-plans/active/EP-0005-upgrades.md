@@ -27,7 +27,7 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - [x] Product spec: `docs/product-specs/progression.md`
 - [x] Product spec: `docs/product-specs/upgrades.md`
 - [x] Implement UpgradeDef registry + `applyUpgrade` (pure)
-- [ ] Deterministic reward generator (3 choices) (issue #25)
+- [x] Deterministic reward generator (3 choices) (issue #25)
 - [ ] Rewards UI + integrate after win (issue #26)
 - [ ] QA: Playwright CLI verification + baseline screenshot regression stays green
 - [ ] Quality gates: lint/typecheck/test/docs:lint + CI green
@@ -54,6 +54,18 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - **TC-REW-003: generator varies across floors**
   - Steps: generate for floorIndex=0 vs floorIndex=1 (same seed)
   - Expected: results may differ (not required always), but must be deterministic per floor
+
+- **TC-REW-UI-001: Win -> rewards screen shows 3 upgrade cards**
+  - Steps: win a battle
+  - Expected: reward overlay shows 3 unique upgrade options
+
+- **TC-REW-UI-002: Selecting an upgrade applies it and proceeds to between-fights**
+  - Steps: choose one upgrade
+  - Expected: heroDef updated; reward screen closes; Between screen appears
+
+- **TC-REW-UI-003: Reward flow does not break baseline battle visuals**
+  - Steps: start new run; ensure baseline screenshot still matches
+  - Expected: screenshot regression passes
 
 ## Tests
 

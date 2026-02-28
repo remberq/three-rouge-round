@@ -1,6 +1,7 @@
 import type { RunAction, RunState } from './types';
 import { initFloorCombat, initRunState, makeEmptyRunState } from './state';
 import { DEFAULT_ENEMY, DEFAULT_HERO } from '../combat';
+import { applyUpgrade } from '../upgrades';
 
 export function runReducer(state: RunState, action: RunAction): RunState {
   switch (action.type) {
@@ -44,7 +45,13 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         return { ...state, screen: 'end', endResult: 'victory' };
       }
 
-      return { ...state, screen: 'between' };
+      return { ...state, screen: 'reward' };
+    }
+
+    case 'UpgradeChosen': {
+      // Apply upgrade and proceed to between-fights.
+      const next = applyUpgrade(state, action.upgradeId);
+      return { ...next, screen: 'between' };
     }
 
     case 'NextFloor': {
