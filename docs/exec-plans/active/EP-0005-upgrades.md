@@ -27,8 +27,8 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - [x] Product spec: `docs/product-specs/progression.md`
 - [x] Product spec: `docs/product-specs/upgrades.md`
 - [x] Implement UpgradeDef registry + `applyUpgrade` (pure)
-- [ ] Deterministic reward generator (3 choices)
-- [ ] Rewards UI + integrate after win
+- [ ] Deterministic reward generator (3 choices) (issue #25)
+- [ ] Rewards UI + integrate after win (issue #26)
 - [ ] QA: Playwright CLI verification + baseline screenshot regression stays green
 - [ ] Quality gates: lint/typecheck/test/docs:lint + CI green
 
@@ -41,6 +41,19 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - **TC-UPG-002: unknown upgrade id is a no-op**
   - Steps: apply unknown id
   - Expected: state unchanged
+
+- **TC-REW-001: generator returns exactly 3 choices**
+  - Preconditions: upgrade pool has >= 3 upgrades
+  - Steps: generate rewards for (seed, floorIndex)
+  - Expected: 3 unique upgrade ids
+
+- **TC-REW-002: generator is deterministic**
+  - Steps: generate twice for same (seed, floorIndex)
+  - Expected: identical results
+
+- **TC-REW-003: generator varies across floors**
+  - Steps: generate for floorIndex=0 vs floorIndex=1 (same seed)
+  - Expected: results may differ (not required always), but must be deterministic per floor
 
 ## Tests
 
