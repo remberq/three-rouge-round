@@ -4,6 +4,7 @@ import { DEFAULT_HERO } from './game/combat';
 import type { CombatState } from './game/combat';
 import { resolvePlayerMove } from './game/combat';
 import { initFloorCombat, initRunState, makeEmptyRunState, runReducer } from './game/run';
+import { selectEnemy } from './game/enemies';
 import type { RunState } from './game/run';
 import { clearRunFromLocalStorage, createOverlays, loadRunFromLocalStorage, saveRunToLocalStorage } from './ui/overlays';
 
@@ -52,7 +53,8 @@ async function main() {
   const makePreviewRun = (): RunState => {
     const base = makeEmptyRunState();
     const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, floorsCount: 5, heroDef: DEFAULT_HERO });
-    return { ...base, seed: defaultSeed, combat, screen: 'start' };
+    const enemyDef = selectEnemy({ seed: defaultSeed, floorIndex: 0, floorsCount: 5 });
+    return { ...base, seed: defaultSeed, enemyDef, combat, screen: 'start' };
   };
 
   let runState: RunState = makePreviewRun();
@@ -90,6 +92,7 @@ async function main() {
     if (!runState.combat) {
       runState = {
         ...runState,
+        enemyDef: selectEnemy({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount }),
         combat: initFloorCombat({ seed: runState.seed, floorIndex: runState.floorIndex, floorsCount: runState.config.floorsCount, heroDef: DEFAULT_HERO }),
       };
     }
