@@ -33,12 +33,12 @@ Create a working scaffold for a PixiJS+TS web app and install a “repo-as-memor
 
 - [x] Create docs structure + indices.
 - [x] Add EP skeleton and link from `docs/STATUS.md`.
-- [ ] Create Vite app under `apps/web`.
-- [ ] Add Pixi board placeholder (8x8).
-- [ ] Add eslint/prettier/vitest/typecheck scripts.
-- [ ] Implement docs-lint.
-- [ ] Add GitHub Actions CI.
-- [ ] Ensure all checks pass.
+- [x] Create Vite app under `apps/web`.
+- [x] Add Pixi board placeholder (8x8).
+- [x] Add eslint/prettier/vitest/typecheck scripts.
+- [x] Implement docs-lint.
+- [x] Add GitHub Actions CI.
+- [x] Ensure all checks pass.
 
 ## Tests
 

@@ -9,6 +9,11 @@ Define a small run structure (MVP: 5 floors) with deterministic floor progressio
 - Complex branching maps
 - Meta-progression
 
+## Current state
+
+- EP-0004 provides floors + between-fights UI, but no scaling.
+- EP-0006 will provide enemy roster; scaling will be applied on top.
+
 ## Approach (high-level)
 
 - `RunConfig` with all balance numbers
@@ -16,9 +21,17 @@ Define a small run structure (MVP: 5 floors) with deterministic floor progressio
 - Optional 2-choice enemy selection on some floors
 - Tests for determinism and scaling
 
-## Tasks (draft)
+## Tasks
 
 - [ ] Consolidate balance knobs into RunConfig
 - [ ] Implement scaling
 - [ ] Map-lite UI
 - [ ] Tests + docs updates
+
+## Tests
+
+- `pnpm -C apps/web lint`
+- `pnpm -C apps/web typecheck`
+- `pnpm -C apps/web test`
+- `pnpm docs:lint`
+- `pnpm e2e`

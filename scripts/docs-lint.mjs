@@ -18,25 +18,14 @@ function read(rel) {
   return fs.readFileSync(path.join(repoRoot, rel), 'utf8');
 }
 
-const required = [
-  'AGENTS.md',
-  'docs/INDEX.md',
-  'docs/STATUS.md',
-  'docs/exec-plans/active/EP-0000-repo-bootstrap.md',
-];
+const required = ['AGENTS.md', 'docs/INDEX.md', 'docs/STATUS.md'];
 
 for (const f of required) {
   if (!exists(f)) fail(`missing required file: ${f}`);
 }
 
-const epPath = 'docs/exec-plans/active/EP-0000-repo-bootstrap.md';
-const ep = read(epPath);
-
-for (const section of ['## Goal', '## Non-goals', '## Current state', '## Approach', '## Tasks', '## Tests']) {
-  if (!ep.includes(section)) fail(`${epPath} missing section: ${section}`);
-}
-
 const status = read('docs/STATUS.md');
+
 // STATUS must link every EP in active/
 const activeDir = path.join(repoRoot, 'docs/exec-plans/active');
 const activeEps = fs
@@ -44,9 +33,20 @@ const activeEps = fs
   .filter((f) => f.toLowerCase().endsWith('.md'))
   .map((f) => `exec-plans/active/${f}`);
 
+if (activeEps.length === 0) {
+  fail('no active execution plans found in docs/exec-plans/active');
+}
+
 for (const epRel of activeEps) {
   if (!status.includes(`(${epRel})`)) {
     fail(`docs/STATUS.md missing link to active EP: ${epRel}`);
+  }
+
+  // Each active EP must contain the harness-required sections.
+  const epPath = path.join(repoRoot, 'docs', epRel);
+  const ep = fs.readFileSync(epPath, 'utf8');
+  for (const section of ['## Goal', '## Non-goals', '## Current state', '## Approach', '## Tasks', '## Tests']) {
+    if (!ep.includes(section)) fail(`${epRel} missing section: ${section}`);
   }
 }
 

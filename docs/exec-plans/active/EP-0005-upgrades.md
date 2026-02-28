@@ -41,3 +41,11 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - **TC-UPG-002: unknown upgrade id is a no-op**
   - Steps: apply unknown id
   - Expected: state unchanged
+
+## Tests
+
+- `pnpm -C apps/web lint`
+- `pnpm -C apps/web typecheck`
+- `pnpm -C apps/web test`
+- `pnpm docs:lint`
+- `pnpm e2e`
