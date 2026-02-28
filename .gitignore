@@ -13,3 +13,7 @@ apps/**/dist/
 # local env
 .env
 .env.*
+
+# playwright
+playwright-report/
+test-results/
