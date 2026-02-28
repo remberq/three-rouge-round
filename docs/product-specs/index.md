@@ -5,3 +5,4 @@
 - Tiles: `tiles.md`
 - Entities & stats: `entities-and-stats.md`
 - Enemies: `enemies.md`
+- Run loop: `run-loop.md`
