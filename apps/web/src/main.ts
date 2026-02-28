@@ -123,7 +123,7 @@ async function main() {
         return;
       }
 
-      // Restore whatever screen we were on (battle/between).
+      // Restore whatever screen we were on (battle/reward/between).
       const next = { ...loadedRun };
       saveRunToLocalStorage(next);
       syncFromRun(next);
@@ -131,6 +131,11 @@ async function main() {
     onReset: () => {
       clearRunFromLocalStorage();
       const next = makePreviewRun();
+      syncFromRun(next);
+    },
+    onChooseUpgrade: (upgradeId) => {
+      const next = runReducer(runState, { type: 'UpgradeChosen', upgradeId });
+      saveRunToLocalStorage(next);
       syncFromRun(next);
     },
     onNextBattle: () => {

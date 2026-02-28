@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 // These tests use the debug hooks registered in main.ts.
 
-test('integration: win -> between, next battle -> battle', async ({ page }) => {
+test('integration: win -> reward -> between -> next battle -> battle', async ({ page }) => {
   await page.goto('/');
 
   await page.getByRole('button', { name: 'New Run' }).click();
@@ -12,6 +12,11 @@ test('integration: win -> between, next battle -> battle', async ({ page }) => {
     // @ts-expect-error debug
     window.__TRR_DEBUG__.forceWin();
   });
+
+  await expect(page.locator('[data-screen="reward"]')).toBeVisible();
+
+  // Pick first upgrade.
+  await page.getByRole('button', { name: 'Pick' }).first().click();
 
   await expect(page.locator('[data-screen="between"]')).toBeVisible();
 
