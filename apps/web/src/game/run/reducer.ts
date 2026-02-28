@@ -31,6 +31,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         seed: state.seed,
         floorIndex: state.floorIndex,
         floorsCount: state.config.floorsCount,
+        enemyClawWeight: state.config.enemyClawWeight,
         heroDef: DEFAULT_HERO,
       });
 
@@ -75,6 +76,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
           seed: state.seed,
           floorIndex: nextFloorIndex,
           floorsCount: state.config.floorsCount,
+          enemyClawWeight: state.config.enemyClawWeight,
           heroDef: DEFAULT_HERO,
         }),
       };

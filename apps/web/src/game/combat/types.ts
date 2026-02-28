@@ -1,4 +1,4 @@
-import type { Board, Coord, MatchGroup, TileId } from '../match3';
+import type { Board, Coord, MatchGroup, TileId, TileWeights } from '../match3';
 
 export type DamageType = 'phys' | 'magic';
 
@@ -43,6 +43,9 @@ export type EnemyDef = {
   attackEveryTurns: number;
   attackPower: number;
   attackType: DamageType;
+
+  // EP-0006.2: match-3 spawn weights modifiers (applied on top of run config)
+  tileWeights?: TileWeights;
 };
 
 export type BattleStatus = 'active' | 'won' | 'lost';

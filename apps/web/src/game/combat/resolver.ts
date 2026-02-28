@@ -1,5 +1,5 @@
 import { createRng, trySwap } from '../match3';
-import type { Coord, SwapResult } from '../match3';
+import type { Coord, SwapResult, TileWeights } from '../match3';
 import type { BridgeConfig } from './bridge';
 import { eventsForSwapResult } from './bridge';
 import { DEFAULT_ENEMY, DEFAULT_HERO, DEFAULT_TILE_DEFS } from './defs';
@@ -10,6 +10,7 @@ export type ResolveConfig = {
   hero?: HeroDef;
   enemy?: EnemyDef;
   tileDefs?: Record<string, TileDef>;
+  tileWeights?: TileWeights;
 };
 
 export function resolvePlayerMove(
@@ -25,11 +26,12 @@ export function resolvePlayerMove(
   void (cfg.hero ?? DEFAULT_HERO);
   const enemy = cfg.enemy ?? DEFAULT_ENEMY;
   const tileDefs = cfg.tileDefs ?? DEFAULT_TILE_DEFS;
+  const tileWeights = cfg.tileWeights;
 
   events.push({ type: 'PlayerMoveAttempted', a, b });
 
   const rng = createRng(state.rngState);
-  const swap = trySwap(state.board, a, b, rng);
+  const swap = trySwap(state.board, a, b, rng, tileWeights);
   const nextRngState = rng.getState();
 
   if (!swap.ok) {

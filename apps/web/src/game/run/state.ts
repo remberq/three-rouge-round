@@ -8,6 +8,7 @@ export const RUN_SCHEMA_VERSION = 1 as const;
 export function defaultRunConfig(overrides: Partial<RunConfig> = {}): RunConfig {
   return {
     floorsCount: overrides.floorsCount ?? 5,
+    enemyClawWeight: overrides.enemyClawWeight ?? 1,
   };
 }
 
@@ -37,7 +38,13 @@ export function initRunState(params: { seed: number; floorsCount?: number }): Ru
     config,
     screen: 'battle',
     floorIndex: 0,
-    combat: initFloorCombat({ seed: params.seed, floorIndex: 0, floorsCount: config.floorsCount, heroDef }),
+    combat: initFloorCombat({
+      seed: params.seed,
+      floorIndex: 0,
+      floorsCount: config.floorsCount,
+      enemyClawWeight: config.enemyClawWeight,
+      heroDef,
+    }),
     endResult: null,
     heroDef,
     enemyDef,
@@ -48,13 +55,25 @@ export function initFloorCombat(params: {
   seed: number;
   floorIndex: number;
   floorsCount: number;
+  enemyClawWeight: number;
   heroDef: typeof DEFAULT_HERO;
 }) {
   // NOTE: deterministic per floor. For MVP we just offset the seed.
   const rng = createRng((params.seed + params.floorIndex * 10_000) >>> 0);
-  const board = createBoard(rng, { width: 8, height: 8, allowInitialMatches: false });
-
   const enemyDef = selectEnemy({ seed: params.seed, floorIndex: params.floorIndex, floorsCount: params.floorsCount });
+
+  // Enemy tile weight modifiers (MVP: only enemyClaw/C).
+  const tileWeights = {
+    C: params.enemyClawWeight,
+    ...(enemyDef.tileWeights ?? {}),
+  };
+
+  const board = createBoard(rng, {
+    width: 8,
+    height: 8,
+    allowInitialMatches: false,
+    tileWeights,
+  });
 
   return initCombatState({ hero: params.heroDef, enemy: enemyDef, board, rngState: rng.getState() });
 }

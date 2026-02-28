@@ -1,5 +1,6 @@
-import type { Board, TileId } from './types';
+import type { Board, TileId, TileWeights } from './types';
 import { TILE_IDS } from './types';
+import { pickWeightedTile } from './tilePool';
 import type { Rng } from './rng';
 import { createEmptyBoard, getTile, setTile } from './board';
 import { findMatches } from './detect';
@@ -8,6 +9,7 @@ export type GenerateOptions = {
   width?: number;
   height?: number;
   tileIds?: readonly TileId[];
+  tileWeights?: TileWeights;
   allowInitialMatches?: boolean;
 };
 
@@ -15,13 +17,14 @@ export function createBoard(rng: Rng, opts: GenerateOptions = {}): Board {
   const width = opts.width ?? 8;
   const height = opts.height ?? 8;
   const tileIds = opts.tileIds ?? TILE_IDS;
+  const tileWeights = opts.tileWeights;
   const allowInitialMatches = opts.allowInitialMatches ?? false;
 
   if (allowInitialMatches) {
     const b = createEmptyBoard(width, height);
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        setTile(b, { x, y }, tileIds[rng.nextInt(tileIds.length)]);
+        setTile(b, { x, y }, pickWeightedTile(rng, tileIds, tileWeights));
       }
     }
     return b;
@@ -55,7 +58,7 @@ export function createBoard(rng: Rng, opts: GenerateOptions = {}): Board {
           continue;
         }
 
-        const tile = candidates[rng.nextInt(candidates.length)];
+        const tile = pickWeightedTile(rng, candidates, tileWeights);
         setTile(b, { x, y }, tile);
       }
     }

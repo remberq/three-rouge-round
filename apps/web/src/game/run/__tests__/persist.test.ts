@@ -46,6 +46,20 @@ describe('run persistence', () => {
     expect(deserializeRun(raw)).toBeNull();
   });
 
+  it('migrates missing enemyClawWeight to default', () => {
+    const valid = initRunState({ seed: 1, floorsCount: 5 });
+
+    // Simulate older save without enemyClawWeight.
+    const legacyState = {
+      ...valid,
+      config: { floorsCount: 5 },
+    };
+
+    const raw = JSON.stringify({ schemaVersion: 1, state: legacyState });
+    const parsed = deserializeRun(raw);
+    expect(parsed?.config.enemyClawWeight).toBe(1);
+  });
+
   it('saveRun writes to key and loadRun reads it', () => {
     const storage = makeMemStorage();
     const state = initRunState({ seed: 7, floorsCount: 3 });
