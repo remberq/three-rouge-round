@@ -99,12 +99,36 @@ async function main() {
     onContinue: () => {
       const loadedRun = loadRunFromLocalStorage();
       if (!loadedRun) return;
-      runState = loadedRun;
 
-      if (!runState.combat) runState = runReducer(runState, { type: 'StartBattle' });
+      // If the run already ended, resume into the end screen.
+      if (loadedRun.endResult) {
+        runState = { ...loadedRun, screen: 'end' };
+        overlays.render(runState);
+        // Keep current battle visuals; user can start a new run from End screen.
+        return;
+      }
+
+      // Active run: ensure we have combat state.
+      runState = { ...loadedRun, screen: 'battle' };
+
+      if (!runState.combat) {
+        // Safe fallback for corrupted/tampered saves.
+        runState = {
+          ...runState,
+          combat: initFloorCombat({
+            seed: runState.seed,
+            floorIndex: runState.floorIndex,
+            heroDef: DEFAULT_HERO,
+            enemyDef: DEFAULT_ENEMY,
+          }),
+        };
+      }
+
       saveRunToLocalStorage(runState);
 
-      state = runState.combat!;
+      const combat = runState.combat;
+      if (!combat) throw new Error('Missing combat state after Continue');
+      state = combat;
       hud.sync(state);
       boardView.syncBoard(state.board);
       syncLayout({ fullSync: true });
