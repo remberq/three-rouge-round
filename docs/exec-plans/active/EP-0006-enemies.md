@@ -40,6 +40,10 @@ Add an MVP enemy roster (≥3 enemies + 1 boss) with distinct stats and at least
   - Steps: select enemy on last floor
   - Expected: boss id
 
+- **TC-ABILITY-001: mage clawRage increases enemyClawWeight after enemy attack**
+  - Steps: set enemy=mage → trigger enemy attack
+  - Expected: runState.config.enemyClawWeight increments
+
 ## Tests
 
 - `pnpm -C apps/web lint`

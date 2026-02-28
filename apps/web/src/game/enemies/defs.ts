@@ -1,5 +1,9 @@
 import type { EnemyDef } from '../combat';
 
+export type EnemyAbility =
+  | { kind: 'none' }
+  | { kind: 'clawRage'; addEnemyClawWeightOnEnemyAttack: number };
+
 export const ENEMY_DEFS = [
   {
     id: 'slime',
@@ -8,6 +12,7 @@ export const ENEMY_DEFS = [
     attackEveryTurns: 3,
     attackPower: 7,
     attackType: 'phys',
+    ability: { kind: 'none' },
   },
   {
     id: 'bandit',
@@ -16,6 +21,7 @@ export const ENEMY_DEFS = [
     attackEveryTurns: 2,
     attackPower: 9,
     attackType: 'phys',
+    ability: { kind: 'none' },
   },
   {
     id: 'mage',
@@ -24,6 +30,8 @@ export const ENEMY_DEFS = [
     attackEveryTurns: 2,
     attackPower: 9,
     attackType: 'magic',
+    // Every enemy attack increases harmful enemyClaw tile weight.
+    ability: { kind: 'clawRage', addEnemyClawWeightOnEnemyAttack: 1 },
   },
   {
     id: 'boss',
@@ -32,6 +40,7 @@ export const ENEMY_DEFS = [
     attackEveryTurns: 2,
     attackPower: 12,
     attackType: 'phys',
+    ability: { kind: 'none' },
   },
 ] satisfies EnemyDef[];
 
