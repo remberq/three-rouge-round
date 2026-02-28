@@ -7,6 +7,10 @@
 ## Active Execution Plans
 
 - [EP-0000: Repo bootstrap + harness](exec-plans/active/EP-0000-repo-bootstrap.md)
+- [EP-0004: Run loop + screens + minimal persistence](exec-plans/active/EP-0004-run-loop.md)
+- (planned) [EP-0005: Rewards / upgrades](exec-plans/active/EP-0005-upgrades.md)
+- (planned) [EP-0006: Enemies roster + abilities](exec-plans/active/EP-0006-enemies.md)
+- (planned) [EP-0007: Scaling + map-lite](exec-plans/active/EP-0007-scaling-map-lite.md)
 
 ## Completed Execution Plans
 
