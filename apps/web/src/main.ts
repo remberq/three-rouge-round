@@ -1,6 +1,7 @@
 import './style.css';
 
 import { DEFAULT_ENEMY, DEFAULT_HERO } from './game/combat';
+import type { CombatState } from './game/combat';
 import { resolvePlayerMove } from './game/combat';
 import { initFloorCombat, initRunState, makeEmptyRunState, runReducer } from './game/run';
 import type { RunState } from './game/run';
@@ -69,8 +70,10 @@ async function main() {
     };
   }
 
-  let state = runState.combat;
-  if (!state) throw new Error('Missing combat state');
+  const combat = runState.combat;
+  if (!combat) throw new Error('Missing combat state');
+
+  let state: CombatState = combat;
 
   // Views
   const boardView = new BoardView();
