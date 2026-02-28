@@ -52,20 +52,20 @@ Decision to be recorded in docs/design-docs.
 
 ## Tasks
 
-- [ ] Docs: create product spec `docs/product-specs/run-loop.md`
+- [x] Docs: create product spec `docs/product-specs/run-loop.md`
 - [x] Docs: update design doc `docs/design-docs/state-model.md` with RunState + transitions
 - [x] Create `RunState` model + reducer in `apps/web/src/game/run/**`
-- [ ] Add start screen: New Run / Continue / Reset
-- [ ] Add end screen: Victory/Defeat
-- [ ] Add between-fights screen (MVP): Floor N/M + “Next battle” button
+- [x] Add start screen: New Run / Continue / Reset
+- [x] Add end screen: Victory/Defeat
+- [x] Add between-fights screen (MVP): Floor N/M + “Next battle” button
 - [x] Screenshot regression baseline (Playwright): capture current battle screen before UI changes
-- [ ] Integrate battle screen with existing combat+render pipeline (issue #18)
+- [x] Integrate battle screen with existing combat+render pipeline (issue #18)
 - [x] Persistence: localStorage save/load, schemaVersion + safe reset
 - [x] Tests:
   - [x] serialize/deserialize + schema version fallback
   - [x] deterministic New Run seed produces same initial RunState
-- [ ] QA (required): write test cases + verify via Playwright CLI (Chromium)
-- [ ] Quality gates: npm lint/typecheck/test/docs:lint (via nvm)
+- [x] QA (required): write test cases + verify via Playwright CLI (Chromium)
+- [x] Quality gates: pnpm lint/typecheck/test/docs:lint + CI green
 
 ## Test cases
 
@@ -138,5 +138,8 @@ Decision to be recorded in docs/design-docs.
 
 ## Done / Remaining
 
-- Done: (none)
-- Remaining: all tasks above
+- Done:
+  - RunState + screens + persistence integrated
+  - Playwright regression + e2e coverage for core flows
+- Remaining:
+  - (none)

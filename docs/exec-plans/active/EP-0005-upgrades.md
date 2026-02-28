@@ -22,11 +22,30 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - UI: 3 cards, preview text
 - Tests: `applyUpgrade` correctness + deterministic generator
 
-## Tasks (draft)
+## Tasks
 
-- [ ] Product spec: `docs/product-specs/progression.md`
-- [ ] Product spec: `docs/product-specs/upgrades.md` (or merge into progression)
-- [ ] Add data definitions + Zod validation (optional)
-- [ ] Implement deterministic reward generator
-- [ ] Implement apply pipeline + UI
-- [ ] Tests + quality gates
+- [x] Product spec: `docs/product-specs/progression.md`
+- [x] Product spec: `docs/product-specs/upgrades.md`
+- [x] Implement UpgradeDef registry + `applyUpgrade` (pure)
+- [ ] Deterministic reward generator (3 choices)
+- [ ] Rewards UI + integrate after win
+- [ ] QA: Playwright CLI verification + baseline screenshot regression stays green
+- [ ] Quality gates: lint/typecheck/test/docs:lint + CI green
+
+## Test cases
+
+- **TC-UPG-001: applyUpgrade increases hpMax**
+  - Steps: apply `stat.hpMax+2`
+  - Expected: heroDef.baseStats.hpMax increments by 2
+
+- **TC-UPG-002: unknown upgrade id is a no-op**
+  - Steps: apply unknown id
+  - Expected: state unchanged
+
+## Tests
+
+- `pnpm -C apps/web lint`
+- `pnpm -C apps/web typecheck`
+- `pnpm -C apps/web test`
+- `pnpm docs:lint`
+- `pnpm e2e`

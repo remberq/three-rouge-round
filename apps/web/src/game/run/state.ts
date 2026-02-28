@@ -27,16 +27,19 @@ export function makeEmptyRunState(): RunState {
 export function initRunState(params: { seed: number; floorsCount?: number }): RunState {
   const config = defaultRunConfig({ floorsCount: params.floorsCount });
 
+  const heroDef = DEFAULT_HERO;
+  const enemyDef = DEFAULT_ENEMY;
+
   return {
     schemaVersion: RUN_SCHEMA_VERSION,
     seed: params.seed,
     config,
     screen: 'battle',
     floorIndex: 0,
-    combat: initFloorCombat({ seed: params.seed, floorIndex: 0, heroDef: DEFAULT_HERO, enemyDef: DEFAULT_ENEMY }),
+    combat: initFloorCombat({ seed: params.seed, floorIndex: 0, heroDef, enemyDef }),
     endResult: null,
-    heroDef: DEFAULT_HERO,
-    enemyDef: DEFAULT_ENEMY,
+    heroDef,
+    enemyDef,
   };
 }
 
