@@ -1,6 +1,7 @@
 import type { RunAction, RunState } from './types';
 import { initFloorCombat, initRunState, makeEmptyRunState } from './state';
 import { DEFAULT_HERO } from '../combat';
+import { selectEnemy } from '../enemies';
 import { applyUpgrade } from '../upgrades';
 
 export function runReducer(state: RunState, action: RunAction): RunState {
@@ -20,6 +21,12 @@ export function runReducer(state: RunState, action: RunAction): RunState {
     case 'StartBattle': {
       if (state.endResult) return state;
 
+      const enemyDef = selectEnemy({
+        seed: state.seed,
+        floorIndex: state.floorIndex,
+        floorsCount: state.config.floorsCount,
+      });
+
       const combat = initFloorCombat({
         seed: state.seed,
         floorIndex: state.floorIndex,
@@ -31,6 +38,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         ...state,
         screen: 'battle',
         combat,
+        enemyDef,
       };
     }
 
@@ -56,9 +64,12 @@ export function runReducer(state: RunState, action: RunAction): RunState {
 
     case 'NextFloor': {
       const nextFloorIndex = Math.min(state.floorIndex + 1, state.config.floorsCount - 1);
+      const enemyDef = selectEnemy({ seed: state.seed, floorIndex: nextFloorIndex, floorsCount: state.config.floorsCount });
+
       return {
         ...state,
         floorIndex: nextFloorIndex,
+        enemyDef,
         screen: 'battle',
         combat: initFloorCombat({
           seed: state.seed,
