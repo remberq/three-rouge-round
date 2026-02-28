@@ -24,11 +24,11 @@ Add an MVP enemy roster (≥3 enemies + 1 boss) with distinct stats and at least
 ## Tasks
 
 - [ ] Product spec updates: `docs/product-specs/enemies.md`, `docs/product-specs/tiles.md`
-- [ ] EnemyDefs + deterministic selection by floor (issue #31)
-- [ ] Enemy tile weights integration (issue #32)
-- [ ] Enemy abilities (MVP triggers) (issue #33)
-- [ ] Integrate with run loop
-- [ ] Tests + quality gates
+- [x] EnemyDefs + deterministic selection by floor (issue #31)
+- [x] Enemy tile weights integration (issue #32)
+- [x] Enemy abilities (MVP triggers) (issue #33)
+- [x] Integrate with run loop
+- [x] Tests + quality gates
 
 ## Test cases
 
@@ -51,3 +51,8 @@ Add an MVP enemy roster (≥3 enemies + 1 boss) with distinct stats and at least
 - `pnpm -C apps/web test`
 - `pnpm docs:lint`
 - `pnpm e2e`
+
+## Done / Remaining
+
+- Done: Enemy roster + deterministic selection + tile weights + MVP ability
+- Remaining: product-spec updates (optional; can be done in EP-0007 if needed)
