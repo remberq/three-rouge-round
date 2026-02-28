@@ -9,6 +9,11 @@
     "lint": "pnpm -C apps/web lint",
     "typecheck": "pnpm -C apps/web typecheck",
     "test": "pnpm -C apps/web test",
+    "e2e": "playwright test",
+    "e2e:update": "playwright test --update-snapshots",
     "docs:lint": "node scripts/docs-lint.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }

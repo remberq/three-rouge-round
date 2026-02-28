@@ -58,6 +58,7 @@ Decision to be recorded in docs/design-docs.
 - [ ] Add start screen: New Run / Continue / Reset
 - [ ] Add end screen: Victory/Defeat
 - [ ] Add between-fights screen (MVP): Floor N/M + “Next battle” button
+- [ ] Screenshot regression baseline (Playwright): capture current battle screen before UI changes
 - [ ] Integrate battle screen with existing combat+render pipeline
 - [ ] Persistence: localStorage save/load, schemaVersion + safe reset
 - [ ] Tests:
