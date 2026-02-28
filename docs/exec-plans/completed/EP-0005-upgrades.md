@@ -28,9 +28,9 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - [x] Product spec: `docs/product-specs/upgrades.md`
 - [x] Implement UpgradeDef registry + `applyUpgrade` (pure)
 - [x] Deterministic reward generator (3 choices) (issue #25)
-- [ ] Rewards UI + integrate after win (issue #26)
-- [ ] QA: Playwright CLI verification + baseline screenshot regression stays green
-- [ ] Quality gates: lint/typecheck/test/docs:lint + CI green
+- [x] Rewards UI + integrate after win (issue #26)
+- [x] QA: Playwright CLI verification + baseline screenshot regression stays green
+- [x] Quality gates: lint/typecheck/test/docs:lint + CI green
 
 ## Test cases
 
@@ -74,3 +74,8 @@ After winning a battle, offer **3 deterministic upgrade choices**, allow the pla
 - `pnpm -C apps/web test`
 - `pnpm docs:lint`
 - `pnpm e2e`
+
+## Done / Remaining
+
+- Done: all tasks above
+- Remaining: (none)
