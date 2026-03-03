@@ -1,7 +1,6 @@
 import type { RunAction, RunState } from './types';
-import { initFloorCombat, initRunState, makeEmptyRunState } from './state';
+import { initFloorCombat, initRunState, makeEmptyRunState, selectRunEnemyDef } from './state';
 import { DEFAULT_HERO } from '../combat';
-import { selectEnemy } from '../enemies';
 import { applyUpgrade } from '../upgrades';
 
 export function runReducer(state: RunState, action: RunAction): RunState {
@@ -21,10 +20,12 @@ export function runReducer(state: RunState, action: RunAction): RunState {
     case 'StartBattle': {
       if (state.endResult) return state;
 
-      const enemyDef = selectEnemy({
+      const enemyDef = selectRunEnemyDef({
         seed: state.seed,
         floorIndex: state.floorIndex,
         floorsCount: state.config.floorsCount,
+        enemyPerFloorMultiplier: state.config.enemyPerFloorMultiplier,
+        bossMultiplier: state.config.bossMultiplier,
       });
 
       const combat = initFloorCombat({
@@ -67,7 +68,13 @@ export function runReducer(state: RunState, action: RunAction): RunState {
 
     case 'NextFloor': {
       const nextFloorIndex = Math.min(state.floorIndex + 1, state.config.floorsCount - 1);
-      const enemyDef = selectEnemy({ seed: state.seed, floorIndex: nextFloorIndex, floorsCount: state.config.floorsCount });
+      const enemyDef = selectRunEnemyDef({
+        seed: state.seed,
+        floorIndex: nextFloorIndex,
+        floorsCount: state.config.floorsCount,
+        enemyPerFloorMultiplier: state.config.enemyPerFloorMultiplier,
+        bossMultiplier: state.config.bossMultiplier,
+      });
 
       return {
         ...state,

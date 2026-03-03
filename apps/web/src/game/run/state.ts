@@ -2,6 +2,36 @@ import { createBoard, createRng } from '../match3';
 import { DEFAULT_HERO, initCombatState } from '../combat';
 import { selectEnemy } from '../enemies';
 import { scaleEnemyDef } from '../scaling/enemyScaling';
+
+type EnemyDef = ReturnType<typeof selectEnemy>;
+
+export function selectRunEnemyDef(params: {
+  seed: number;
+  floorIndex: number;
+  floorsCount: number;
+  enemyPerFloorMultiplier: number;
+  bossMultiplier: number;
+}): EnemyDef {
+  const enemyDefRaw = selectEnemy({
+    seed: params.seed,
+    floorIndex: params.floorIndex,
+    floorsCount: params.floorsCount,
+  });
+
+  const isBoss = enemyDefRaw.id === 'boss' && params.floorIndex >= params.floorsCount - 1;
+
+  return scaleEnemyDef({
+    enemy: enemyDefRaw,
+    floorIndex: params.floorIndex,
+    floorsCount: params.floorsCount,
+    cfg: {
+      perFloorMultiplier: params.enemyPerFloorMultiplier,
+      bossMultiplier: params.bossMultiplier,
+      rounding: 'floor',
+    },
+    isBoss,
+  });
+}
 import type { RunConfig, RunState } from './types';
 
 export const RUN_SCHEMA_VERSION = 1 as const;
@@ -16,16 +46,24 @@ export function defaultRunConfig(overrides: Partial<RunConfig> = {}): RunConfig 
 }
 
 export function makeEmptyRunState(): RunState {
+  const config = defaultRunConfig();
+
   return {
     schemaVersion: RUN_SCHEMA_VERSION,
     seed: 0,
-    config: defaultRunConfig(),
+    config,
     screen: 'start',
     floorIndex: 0,
     combat: null,
     endResult: null,
     heroDef: DEFAULT_HERO,
-    enemyDef: selectEnemy({ seed: 0, floorIndex: 0, floorsCount: 5 }),
+    enemyDef: selectRunEnemyDef({
+      seed: 0,
+      floorIndex: 0,
+      floorsCount: config.floorsCount,
+      enemyPerFloorMultiplier: config.enemyPerFloorMultiplier,
+      bossMultiplier: config.bossMultiplier,
+    }),
   };
 }
 
@@ -33,7 +71,13 @@ export function initRunState(params: { seed: number; floorsCount?: number }): Ru
   const config = defaultRunConfig({ floorsCount: params.floorsCount });
 
   const heroDef = DEFAULT_HERO;
-  const enemyDef = selectEnemy({ seed: params.seed, floorIndex: 0, floorsCount: config.floorsCount });
+  const enemyDef = selectRunEnemyDef({
+    seed: params.seed,
+    floorIndex: 0,
+    floorsCount: config.floorsCount,
+    enemyPerFloorMultiplier: config.enemyPerFloorMultiplier,
+    bossMultiplier: config.bossMultiplier,
+  });
 
   return {
     schemaVersion: RUN_SCHEMA_VERSION,
@@ -69,20 +113,13 @@ export function initFloorCombat(params: {
 }) {
   // NOTE: deterministic per floor. For MVP we just offset the seed.
   const rng = createRng((params.seed + params.floorIndex * 10_000) >>> 0);
-  const enemyDefRaw = selectEnemy({ seed: params.seed, floorIndex: params.floorIndex, floorsCount: params.floorsCount });
 
-  // Enemy scaling (EP-0007)
-  const isBoss = enemyDefRaw.id === 'boss' && params.floorIndex >= params.floorsCount - 1;
-  const enemyDef = scaleEnemyDef({
-    enemy: enemyDefRaw,
+  const enemyDef = selectRunEnemyDef({
+    seed: params.seed,
     floorIndex: params.floorIndex,
     floorsCount: params.floorsCount,
-    cfg: {
-      perFloorMultiplier: params.enemyPerFloorMultiplier,
-      bossMultiplier: params.bossMultiplier,
-      rounding: 'floor',
-    },
-    isBoss,
+    enemyPerFloorMultiplier: params.enemyPerFloorMultiplier,
+    bossMultiplier: params.bossMultiplier,
   });
 
   // Enemy tile weight modifiers (MVP: only enemyClaw/C).
