@@ -52,7 +52,15 @@ async function main() {
 
   const makePreviewRun = (): RunState => {
     const base = makeEmptyRunState();
-    const combat = initFloorCombat({ seed: defaultSeed, floorIndex: 0, floorsCount: 5, enemyClawWeight: 1, heroDef: DEFAULT_HERO });
+    const combat = initFloorCombat({
+      seed: defaultSeed,
+      floorIndex: 0,
+      floorsCount: 5,
+      enemyClawWeight: 1,
+      enemyPerFloorMultiplier: 0.12,
+      bossMultiplier: 1.35,
+      heroDef: DEFAULT_HERO,
+    });
     const enemyDef = selectEnemy({ seed: defaultSeed, floorIndex: 0, floorsCount: 5 });
     return { ...base, seed: defaultSeed, enemyDef, combat, screen: 'start' };
   };
@@ -74,6 +82,8 @@ async function main() {
         floorIndex: runState.floorIndex,
         floorsCount: runState.config.floorsCount,
         enemyClawWeight: runState.config.enemyClawWeight,
+        enemyPerFloorMultiplier: runState.config.enemyPerFloorMultiplier,
+        bossMultiplier: runState.config.bossMultiplier,
         heroDef: DEFAULT_HERO,
       }),
     };
@@ -104,6 +114,8 @@ async function main() {
           floorIndex: runState.floorIndex,
           floorsCount: runState.config.floorsCount,
           enemyClawWeight: runState.config.enemyClawWeight,
+          enemyPerFloorMultiplier: runState.config.enemyPerFloorMultiplier,
+          bossMultiplier: runState.config.bossMultiplier,
           heroDef: DEFAULT_HERO,
         }),
       };

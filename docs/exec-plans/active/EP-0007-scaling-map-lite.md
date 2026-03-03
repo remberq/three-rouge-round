@@ -23,10 +23,24 @@ Define a small run structure (MVP: 5 floors) with deterministic floor progressio
 
 ## Tasks
 
-- [ ] Consolidate balance knobs into RunConfig
-- [ ] Implement scaling
-- [ ] Map-lite UI
+- [ ] RunConfig balance knobs + scaling formulas (issue #39)
+- [ ] Map-lite UI (issue #40)
+- [ ] Optional enemy choice (2 options) (issue #41)
 - [ ] Tests + docs updates
+
+## Test cases
+
+- **TC-SCALE-001: scaling is deterministic**
+  - Steps: compute scaled enemy twice for same (enemyId, floorIndex, config)
+  - Expected: identical stats
+
+- **TC-SCALE-002: hp/atk scale up with floors**
+  - Steps: compare scaled stats on floor 0 vs floor 4
+  - Expected: floor 4 >= floor 0
+
+- **TC-SCALE-003: boss scaling uses boss multiplier**
+  - Steps: scale boss enemy on last floor
+  - Expected: boss stats reflect multiplier
 
 ## Tests
 
